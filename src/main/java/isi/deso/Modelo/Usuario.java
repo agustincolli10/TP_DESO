@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package isi.deso.Model;
+package isi.deso.Modelo;
 
 /**
  *
@@ -27,10 +27,15 @@ public class Usuario {
     public String getApellido() { return apellido; }
     public void setApellido(String apellido) { this.apellido = apellido; }
 
-    public String getUsuario() { return nombreUsuario; }
-    public void setUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
+    public String getNUsuario() { return nombreUsuario; }
+    public void setNUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
 
     public String getContrasenia() { return contrasenia; }
     public void setContrasenia(String contrasenia) { this.contrasenia = contrasenia; }
+    
+    @Override
+    public String toString(){
+        return "Conserje: " + '\n' + "ID: " + nombreUsuario + '\n' + "Nombre: " + nombre + " " + apellido + '\n';
+    }
     
 }
