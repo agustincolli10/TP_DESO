@@ -4,8 +4,11 @@
  */
 package isi.deso.Presentacion;
 
+import isi.deso.Modelo.Archivo;
 import isi.deso.Modelo.Usuario;
 import isi.deso.Negocio.UsuarioServicio;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -14,11 +17,39 @@ import java.util.Scanner;
  */
 public class Main {
     public static void main(String[] args) {
+        
+        //LECTURA DE TXT CON CONSERJES
+        Archivo a = new Archivo();
+        
+        String arch = a.leerTxt("D:\\USUARIO\\Documents\\txt\\usuariosCargados.txt");
+        System.out.println(arch);
+        
+        String[] datosUsers = arch.split(" ");
+        List<Usuario> listaDeUsuarios = new ArrayList<>();
+        
+        UsuarioServicio servicio = new UsuarioServicio(); //Lista de usuarios
+        
+        for (int i = 0; i < datosUsers.length; i += 4) {
+            String nTemp = datosUsers[i];
+            String apTemp = datosUsers[i + 1];
+            String uTemp = datosUsers[i + 2];
+            String cTemp = datosUsers[i + 3];
+            
+            Usuario nuevoUsuario = new Usuario(nTemp, apTemp, uTemp, cTemp);
+            servicio.registrarUsuario(nuevoUsuario);
+
+        }
+        
+        System.out.println("\n--- Lista actual de usuarios ---");
+        servicio.listarTodos().forEach(System.out::println);
+        //ACA TERMINA - PASAR A UNA NUEVA CLASE
+        
+        /*
         Scanner scanner = new Scanner(System.in);
-        UsuarioServicio servicio = new UsuarioServicio();
+        
         int opcionA; //Es el que ingresa en el switch de opciones
         
-        //CARGA DEL USUARIO GENERAL
+        //CARGA DEL USUARIO GENERAL - NO VA, CORREGIR
         Usuario user089 = new Usuario("Agustin", "Colli", "AColli089", "Tate1989");
         servicio.registrarUsuario(user089);
         
@@ -55,6 +86,6 @@ public class Main {
             servicio.listarTodos().forEach(System.out::println);
 
             }
-        } while(opcionA > 2);
+        } while(opcionA > 2);*/
     }
 }
