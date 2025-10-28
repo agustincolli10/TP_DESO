@@ -1,6 +1,6 @@
-package ar.edu.utn.ds2025.hotel.exception; 
+package isi.deso.Excepcion; 
 
-public class AutenticacionException extends AppException { 
+public class AutenticacionException extends MainException { 
     public AutenticacionException(String m){ 
         super(m);
     } 

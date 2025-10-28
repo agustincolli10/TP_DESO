@@ -1,6 +1,6 @@
 
 package isi.deso.Servicio;
-import ar.edu.utn.ds2025.hotel.exception.AutenticacionException;
+import isi.deso.Excepcion.*;
 import java.io.*; import java.nio.charset.StandardCharsets;
 public class AuthService {
   public void autenticar(String username, String password) {

@@ -1,10 +1,10 @@
-package ar.edu.utn.ds2025.hotel.exception; 
-public class AppException extends RuntimeException { 
-    public AppException(String m){ 
+package isi.deso.Excepcion; 
+public class MainException extends RuntimeException { 
+    public MainException(String m){ 
         super(m);
     }
     
-    public AppException(String m, Throwable t){ 
+    public MainException(String m, Throwable t){ 
         super(m,t);
     } 
 }
