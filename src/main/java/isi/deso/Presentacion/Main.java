@@ -11,13 +11,15 @@ import java.util.Scanner;
 import isi.deso.Modelo.Archivo;
 import isi.deso.Modelo.Usuario;
 import isi.deso.Negocio.UsuarioServicio;
-
+import isi.deso.Servicio.HuespedService;
+import isi.deso.Modelo.TipoDocumento;
 /**
  *
  * @author USUARIO
  */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
+  private static final HuespedService huespedService = new HuespedService();
     public static void main(String[] args) {
         // LO DEJO COMENTADO PARA QUE PUEDAN PROBAR SIN INICIAR SESION
         try {
@@ -59,7 +61,7 @@ public class Main {
                 System.out.println("Usuario validado");
             } else { System.out.println("Usuario no encontrado");}
         
-            //LOOP
+            
             while(true){
                 System.out.println();
                 System.out.println("Menú:");
@@ -80,17 +82,55 @@ public class Main {
         System.out.println("Fin.");
     }
         
-        // CU02 - AGREGAR 
-        /*static void cu02(){
-            System.out.println("CU02 - Buscar huésped");
-            System.out.print("Apellido empieza con (ENTER salta): "); String ap = scanner.nextLine();
-            System.out.print("Nombres empieza con (ENTER salta): "); String no = scanner.nextLine();
-            System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO) o ENTER: "); String t = scanner.nextLine();
-            TipoDocumento tipo = t.isBlank()?null:TipoDocumento.valueOf(t.toUpperCase());
-            System.out.print("Número doc (ENTER salta): "); String nro = scanner.nextLine();
-            var lista = huespedService.buscar(ap, no, tipo, nro);
-            if (lista.isEmpty()) System.out.println("Sin resultados");
-            else lista.forEach(System.out::println);
+  static void cu02() {
+    System.out.println("CU02 - Buscar huésped");
+
+    System.out.print("Apellido empieza con (ENTER salta): ");
+    String ap = scanner.nextLine();
+
+    System.out.print("Nombres empieza con (ENTER salta): ");
+    String no = scanner.nextLine();
+
+    System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO) o ENTER: ");
+    String t = scanner.nextLine();
+    TipoDocumento tipo = parseTipo(t);
+
+    System.out.print("Número doc (ENTER salta): ");
+    String nro = scanner.nextLine();
+
+    var lista = huespedService.buscar(ap, no, tipo, nro);
+
+    if (lista.isEmpty()) {
+        System.out.println("No existen concordancias para los criterios de búsqueda.");
+      
+        return;
+    }
+
+    for (int i = 0; i < lista.size(); i++) {
+        System.out.printf("[%d] %s%n", i + 1, lista.get(i));
+    }
+
+    
+    System.out.print("Seleccione Nº (Enter vacío = alta): ");
+    String sel = scanner.nextLine();
+    if (sel.isBlank()) {
+        System.out.println("Simular CU09: Alta de huésped.");
+    } else {
+        try {
+            int idx = Integer.parseInt(sel) - 1;
+            System.out.println("Seleccionado: " + lista.get(idx));
+            System.out.println("Simular CU10: Modificar huésped.");
+        } catch (Exception e) {
+            System.out.println("Selección inválida → alta.");
         }
-    */
+    }
 }
+
+private static TipoDocumento parseTipo(String s) {
+    if (s == null || s.isBlank()) return null;
+    try { return TipoDocumento.valueOf(s.trim().toUpperCase()); }
+    catch (Exception e) { return null; }
+}
+
+}
+
