@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import isi.deso.Modelo.Huesped;
 import isi.deso.Modelo.TipoDocumento;
-/** CU02 Buscar huésped (sin DAO): lee resources/data/huespedes.csv con columnas: tipo;nro;apellido;nombres */
+
 public class HuespedService {
   private List<Huesped> cargar(){
     List<Huesped> list = new ArrayList<>();
@@ -31,50 +31,66 @@ public class HuespedService {
         }
       }
     } catch (IOException e) {
-      // en avance 1, solo ignoramos y devolvemos lista vacía
+      
     }
     return list;
   }
 
 
- public List<Huesped> buscar(String apellidoEmpiezaCon,
-                            String nombresEmpiezaCon,
-                            TipoDocumento tipo,
-                            String nro) {
+package isi.deso.Servicio;
+
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.Comparator;
+
+import isi.deso.Modelo.Huesped;
+import isi.deso.Modelo.TipoDocumento;
+
+public class HuespedService {
+  
+
+  public List<Huesped> buscar(String apellidoEmpiezaCon,
+                              String nombresEmpiezaCon,
+                              TipoDocumento tipo,
+                              String nro) {
 
     String ap = normalize(apellidoEmpiezaCon);
     String no = normalize(nombresEmpiezaCon);
     String nd = normalize(nro);
 
-    // Predicado que vamos encadenando (AND) según haya criterios
-    java.util.function.Predicate<Huesped> p = h -> true;
+    Predicate<Huesped> p = h -> true;
 
     if (!ap.isEmpty()) {
-        p = p.and(h -> h.getApellido() != null
-                   && h.getApellido().toUpperCase().startsWith(ap));
+      p = p.and(h -> h.getApellido()!=null &&
+                     h.getApellido().toUpperCase().startsWith(ap));
     }
     if (!no.isEmpty()) {
-        p = p.and(h -> h.getNombres() != null
-                   && h.getNombres().toUpperCase().startsWith(no));
+      p = p.and(h -> h.getNombres()!=null &&
+                     h.getNombres().toUpperCase().startsWith(no));
     }
     if (tipo != null) {
-        p = p.and(h -> h.getTipoDocumento() == tipo);
+      p = p.and(h -> h.getTipoDocumento()==tipo);
     }
     if (!nd.isEmpty()) {
-        p = p.and(h -> nd.equals(h.getNumeroDocumento()));
+      p = p.and(h -> nd.equals(h.getNumeroDocumento()));
     }
 
     return cargar().stream()
-            .filter(p) // <- lambdas/streams
-            .sorted(java.util.Comparator
-                    .comparing(Huesped::getApellido, String.CASE_INSENSITIVE_ORDER)
-                    .thenComparing(Huesped::getNombres, String.CASE_INSENSITIVE_ORDER))
-            .collect(Collectors.toList());
+        .filter(p)
+        .sorted(
+            Comparator.comparing(Huesped::getApellido, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+                      .thenComparing(Huesped::getNombres, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+        )
+        .collect(Collectors.toList());
+  }
+
+  private static String normalize(String s) {
+    return (s==null) ? "" : s.trim().toUpperCase();
+  }
 }
 
-private static String normalize(String s) {
-    return (s == null) ? "" : s.trim().toUpperCase();
-}
 
 }
+
 
