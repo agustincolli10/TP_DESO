@@ -10,12 +10,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-/**
-  CU02 - Buscar Huésped usando DAO .
-  Cada criterio es opcional; si viene, filtra.
-  Varios criterios se combinan con AND.
-  Orden: Apellido, luego Nombres (case-insensitive, null-safe).
- */
 public class HuespedService {
 
   private final HuespedDAO dao;
@@ -60,7 +54,6 @@ public class HuespedService {
         .collect(Collectors.toList());
   }
 
-  
   private static String normalize(String s) {
     return (s == null) ? "" : s.trim().toUpperCase();
   }
