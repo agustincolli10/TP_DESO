@@ -17,6 +17,11 @@ import isi.deso.Modelo.Huesped;
 import isi.deso.Modelo.DireccionDTO;
 import isi.deso.Modelo.PosicionIVA;
 import isi.deso.Strategy.Validacion;
+import isi.deso.DAO.UsuarioDAO;
+import isi.deso.DAO.UsuarioDAOImpFile;
+import isi.deso.DAO.HuespedDAO;
+import isi.deso.DAO.HuespedDAOImp;
+
 import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
 
