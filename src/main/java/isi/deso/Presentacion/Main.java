@@ -1,48 +1,48 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package isi.deso.Presentacion;
 
 import java.util.List;
 import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
+import isi.deso.DAO.HuespedDAO;
+import isi.deso.DAO.HuespedDAOImp;
+import isi.deso.DAO.UsuarioDAO;
+import isi.deso.DAO.UsuarioDAOImpFile;
+
+import isi.deso.Modelo.Huesped;
 import isi.deso.Modelo.TipoDocumento;
+import isi.deso.Modelo.PosicionIVA;
+import isi.deso.Modelo.DireccionDTO;
+
 import isi.deso.Servicio.HuespedService;
 import isi.deso.Servicio.AuthService;
 import isi.deso.Excepcion.AutenticacionException;
-import isi.deso.DAO.HuespedDAO;
-import isi.deso.DAO.HuespedDAOImp;
-import isi.deso.Modelo.Huesped;
-import isi.deso.Modelo.DireccionDTO;
-import isi.deso.Modelo.PosicionIVA;
-import isi.deso.Strategy.Validacion;
-import isi.deso.DAO.UsuarioDAO;
-import isi.deso.DAO.UsuarioDAOImpFile;
-import isi.deso.DAO.HuespedDAO;
-import isi.deso.DAO.HuespedDAOImp;
 
+import isi.deso.Strategy.Validacion;
 import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
-
-private static final UsuarioDAO usuarioDAO = new UsuarioDAOImpFile();
-private static final HuespedDAO huespedDAO = new HuespedDAOImp();
-private static final HuespedService huespedService = new HuespedService(new HuespedDAOImp());
 
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
-    private static final HuespedService huespedService = new HuespedService();
+
+   
+    private static final HuespedDAO huespedDAO = new HuespedDAOImp();               // huespedesCargados.txt
+    private static final UsuarioDAO usuarioDAO = new UsuarioDAOImpFile();           
+
+    
+    private static final HuespedService huespedService = new HuespedService(huespedDAO);
 
     public static void main(String[] args) {
         try {
-            
+            // =========================
             // CU01 - Autenticar usuario
-         
+            // =========================
             System.out.println("BIENVENIDO");
             System.out.println("Ingrese sus datos para continuar\n");
 
-           AuthService auth = new AuthService(usuarioDAO);
+            AuthService auth = new AuthService(usuarioDAO);
 
             while (true) {
                 System.out.print("Ingresar nombre de usuario: ");
@@ -52,19 +52,17 @@ public class Main {
                 String contrasenia = scanner.nextLine();
 
                 try {
-                    // Lanza AutenticacionException si falla 
-                    auth.autenticar(nombreUs, contrasenia);
+                    auth.autenticar(nombreUs, contrasenia); // valida contra usuariosCargados.txt
                     System.out.println("Usuario validado\n");
                     break;
                 } catch (AutenticacionException e) {
                     System.out.println("ERROR: " + e.getMessage());
-                    // vuelve a pedir credenciales
                 }
             }
 
-           
-            // Menú principal 
-           
+            // =========================
+            // Menú principal (CU02)
+            // =========================
             while (true) {
                 System.out.println();
                 System.out.println("Menú:");
@@ -73,7 +71,7 @@ public class Main {
                 System.out.print("> ");
                 String op = scanner.nextLine();
                 switch (op) {
-                    case "1" -> cu02(); // <<-- activar CU02
+                    case "1" -> cu02();
                     case "0" -> { System.out.println("Fin."); return; }
                     default -> System.out.println("Opción inválida");
                 }
@@ -85,9 +83,9 @@ public class Main {
         }
     }
 
-    
+    // =========================
     // CU02 - Buscar huésped
-
+    // =========================
     static void cu02() {
         System.out.println("CU02 - Buscar huésped");
 
@@ -104,13 +102,13 @@ public class Main {
         System.out.print("Número doc (ENTER salta): ");
         String nro = scanner.nextLine();
 
-        List<isi.deso.Modelo.Huesped> lista = huespedService.buscar(ap, no, tipo, nro);
+        List<Huesped> lista = huespedService.buscar(ap, no, tipo, nro);
 
-if (lista.isEmpty()) {
-    System.out.println("No existen concordancias para los criterios de búsqueda.");
-    cu09();     
-    return;
-}
+        if (lista.isEmpty()) {
+            System.out.println("No existen concordancias para los criterios de búsqueda.");
+            cu09(); // alta directa si no hay resultados
+            return;
+        }
 
         for (int i = 0; i < lista.size(); i++) {
             System.out.printf("[%d] %s%n", i + 1, lista.get(i));
@@ -118,10 +116,91 @@ if (lista.isEmpty()) {
 
         System.out.print("Seleccione Nº (Enter vacío = alta): ");
         String sel = scanner.nextLine();
-if (sel.isBlank()) {
-    cu09();       
-    return;
-}
+        if (sel.isBlank()) {
+            cu09(); // alta si el usuario no selecciona ninguno
+            return;
+        }
+
+        try {
+            int idx = Integer.parseInt(sel) - 1;
+            System.out.println("Seleccionado: " + lista.get(idx));
+            System.out.println("Simular CU10: Modificar huésped.");
+        } catch (Exception e) {
+            System.out.println("Selección inválida → alta.");
+            cu09();
+        }
+    }
+
+    // =========================
+    // CU09 - Alta de huésped
+    // =========================
+    static void cu09() {
+        System.out.println("\nCU09 - Alta de huésped");
+
+        // Datos personales
+        System.out.print("Nombres: "); String nombres = scanner.nextLine().trim();
+        System.out.print("Apellido: "); String apellido = scanner.nextLine().trim();
+
+        System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO): ");
+        TipoDocumento tipo = parseTipo(scanner.nextLine());
+
+        System.out.print("Número doc: "); String nroDoc = scanner.nextLine().trim();
+
+        System.out.print("CUIT (ENTER si no tiene): "); String cuit = scanner.nextLine().trim();
+        if (cuit.isEmpty()) cuit = null;
+
+        System.out.print("Posición IVA (ResponsableInscripto/Monotributista/Exento/ConsumidorFinal): ");
+        PosicionIVA pos = parsePos(scanner.nextLine());
+
+        System.out.print("Fecha de nacimiento (YYYY-MM-DD o dd/MM/yyyy): ");
+        LocalDate fNac = parseFecha(scanner.nextLine());
+
+        // Dirección
+        System.out.println("\n--- Dirección ---");
+        System.out.print("Calle: "); String calle = scanner.nextLine().trim();
+        System.out.print("Número: "); String numero = scanner.nextLine().trim();
+        System.out.print("Departamento: "); String depto = scanner.nextLine().trim();
+        System.out.print("Piso: "); String piso = scanner.nextLine().trim();
+        System.out.print("Código Postal: "); String cp = scanner.nextLine().trim();
+        System.out.print("Localidad: "); String loc = scanner.nextLine().trim();
+        System.out.print("Provincia: "); String prov = scanner.nextLine().trim();
+        System.out.print("País: "); String pais = scanner.nextLine().trim();
+        DireccionDTO dir = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
+
+        // Contacto y otros
+        System.out.println("\n--- Contacto y otros ---");
+        System.out.print("Teléfono: "); String tel = scanner.nextLine().trim();
+        System.out.print("Email (ENTER si no tiene): "); String email = scanner.nextLine().trim();
+        if (email.isEmpty()) email = null;
+        System.out.print("Ocupación: "); String ocu = scanner.nextLine().trim();
+        System.out.print("Nacionalidad: "); String nac = scanner.nextLine().trim();
+
+        // Construir entidad (usa tu constructor largo)
+        Huesped h = new Huesped(
+            nombres, apellido, tipo, nroDoc, cuit,
+            pos, fNac, dir, tel, email, ocu, nac
+        );
+
+        // Validaciones CU09
+        Validacion v1 = new ValidacionCampos();
+        Validacion v2 = new ValidacionDocumentoUnico(huespedDAO);
+
+        boolean ok = v1.validar(h);
+        if (!ok) { System.out.println(v1.getMensajeError()); return; }
+
+        ok = v2.validar(h);
+        if (!ok) { System.out.println(v2.getMensajeError()); return; }
+
+        // Persistir alta
+        try {
+            huespedDAO.crearHuesped(h);
+            System.out.println("✅ Huésped dado de alta correctamente.");
+        } catch (Exception e) {
+            System.out.println("❌ Error al guardar el huésped: " + e.getMessage());
+        }
+    }
+
+    // -------- helpers --------
 
     private static TipoDocumento parseTipo(String s) {
         if (s == null || s.isBlank()) return null;
@@ -129,6 +208,21 @@ if (sel.isBlank()) {
         catch (Exception e) { return null; }
     }
 
+    private static PosicionIVA parsePos(String s) {
+        if (s == null || s.isBlank()) return PosicionIVA.ConsumidorFinal;
+        try { return PosicionIVA.valueOf(s.trim().replace(" ", "")); }
+        catch (Exception e) { return PosicionIVA.ConsumidorFinal; }
+    }
 
-    
+    private static LocalDate parseFecha(String s) {
+        if (s == null || s.isBlank()) return null;
+        String v = s.trim();
+        try { return LocalDate.parse(v); } // YYYY-MM-DD
+        catch (Exception e) {
+            try {
+                DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                return LocalDate.parse(v, f);
+            } catch (Exception ex) { return null; }
+        }
+    }
 }
