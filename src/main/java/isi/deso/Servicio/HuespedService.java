@@ -10,15 +10,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
+import isi.deso.DAO.HuespedDAO;
 import isi.deso.Modelo.Huesped;
 import isi.deso.Modelo.TipoDocumento;
 
 public class HuespedService {
 
   private static final String HUESPEDES_CSV = "data/huespedes.csv";
-
-
+private final HuespedDAO dao;
+ public HuespedService() { this.dao = null; }
+  public HuespedService(HuespedDAO dao) { this.dao = dao; }
   private List<Huesped> cargar() {
     List<Huesped> list = new ArrayList<>();
     try (InputStream is = getClass().getClassLoader().getResourceAsStream(HUESPEDES_CSV)) {
@@ -102,3 +103,4 @@ public class HuespedService {
     catch (Exception e) { return null; }
   }
 }
+
