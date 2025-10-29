@@ -9,7 +9,6 @@ import java.util.List;
 
 public class UsuarioDAOImpFile implements UsuarioDAO {
     private static final String ARCHIVO = "usuariosCargados.txt";
-    private static final String SEP = ";";
 
     @Override
     public List<Usuario> listaCompUser() {
@@ -21,11 +20,17 @@ public class UsuarioDAOImpFile implements UsuarioDAO {
                 new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
             String l;
             while ((l = br.readLine()) != null) {
-                if (l.isBlank() || l.startsWith("#")) continue;
-                String[] p = l.split(SEP, -1);
+                l = l.trim();
+                if (l.isEmpty() || l.startsWith("#")) continue;
+
+                // Formato: Nombre Apellido Usuario Contraseña (separados por espacios)
+                String[] p = l.split("\\s+");
                 if (p.length >= 4) {
-                    // formato: nombre;apellido;usuario;contrasenia
-                    out.add(new Usuario(p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim()));
+                    String nombre      = p[0].trim();
+                    String apellido    = p[1].trim();
+                    String usuario     = p[2].trim();
+                    String contrasenia = p[3].trim();  // asumimos sin espacios internos
+                    out.add(new Usuario(nombre, apellido, usuario, contrasenia));
                 }
             }
         } catch (IOException e) {
@@ -38,11 +43,11 @@ public class UsuarioDAOImpFile implements UsuarioDAO {
     public void guardarUsuario(Usuario u) {
         try (BufferedWriter bw = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(ARCHIVO, true), StandardCharsets.UTF_8))) {
-            bw.write(u.getNombre() + SEP + u.getApellido() + SEP + u.getNUsuario() + SEP + u.getContrasenia());
+            // Escribir con espacios como separador
+            bw.write(u.getNombre() + " " + u.getApellido() + " " + u.getNUsuario() + " " + u.getContrasenia());
             bw.newLine();
         } catch (IOException e) {
             throw new RuntimeException("Error escribiendo " + ARCHIVO, e);
         }
     }
 }
-
