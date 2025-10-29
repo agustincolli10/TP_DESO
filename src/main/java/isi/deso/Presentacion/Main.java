@@ -21,7 +21,8 @@ import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
 
 private static final HuespedDAO huespedDAO = new HuespedDAOImp();
-private static final HuespedService huespedService = new HuespedService(huespedDAO);
+private static final HuespedService huespedService = new HuespedService(new HuespedDAOImp());
+
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
