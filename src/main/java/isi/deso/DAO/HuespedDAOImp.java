@@ -96,39 +96,104 @@ public class HuespedDAOImp implements HuespedDAO{
                 .findFirst()
                 .orElse(null);
     }
+
     @Override
     public void eliminarHuesped(Huesped h) {
-    File archivo = new File("huespedesCargados.txt");
-    File archivoTemp = new File("huespedesCargados_temp.txt");
+        File archivo = new File("huespedesCargados.txt");
+        File archivoTemp = new File("huespedesCargados_temp.txt");
 
-    try (BufferedReader br = new BufferedReader(new FileReader(archivo));
-         BufferedWriter bw = new BufferedWriter(new FileWriter(archivoTemp))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(archivoTemp))) {
 
-        String linea;
-        while ((linea = br.readLine()) != null) {
-            String[] datos = linea.split(";", -1); // separar por tu separador
-            if (datos.length >= 20) { // ajustar según cantidad de campos
-                String tipoDoc = datos[2];
-                String numDoc  = datos[3];
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(";", -1); 
+                if (datos.length >= 19) { // cantidad real de campos
+                    String tipoDoc = datos[2];
+                    String numDoc  = datos[3];
 
-                // Solo copiamos la línea si NO es el huésped a eliminar
-                if (!(tipoDoc.equalsIgnoreCase(h.getTipoDocumento().toString()) &&
-                      numDoc.equalsIgnoreCase(h.getNumeroDocumento()))) {
+                    if (!(tipoDoc.equalsIgnoreCase(h.getTipoDocumento().toString()) &&
+                        numDoc.equalsIgnoreCase(h.getNumeroDocumento()))) {
+                        bw.write(linea);
+                        bw.newLine();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // reemplazar archivo
+        if (!archivo.delete()) System.out.println("No se pudo borrar el archivo original.");
+        if (!archivoTemp.renameTo(archivo)) System.out.println("No se pudo renombrar el archivo temporal.");
+    }
+
+
+    @Override
+
+    public void modificarHuesped(TipoDocumento tipoOriginal, String numOriginal, Huesped hActualizado) {
+        File archivo = new File(ARCHIVO);
+        File archivoTemp = new File("huespedesCargados_temp.txt");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(archivoTemp))) {
+
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(SEPARADOR, -1);
+                if (datos.length >= 19) {
+                    String tipoDoc = datos[2];
+                    String numDoc  = datos[3];
+
+                    // Si coincide con el huésped a modificar
+                    if (tipoDoc.equalsIgnoreCase(tipoOriginal.toString()) &&
+                        numDoc.equalsIgnoreCase(numOriginal)) {
+
+                        // Reconstruir línea con los datos actualizados
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(hActualizado.getApellido()).append(SEPARADOR)
+                        .append(hActualizado.getNombres()).append(SEPARADOR)
+                        .append(hActualizado.getTipoDocumento()).append(SEPARADOR)
+                        .append(hActualizado.getNumeroDocumento()).append(SEPARADOR)
+                        .append(hActualizado.getCuit() != null ? hActualizado.getCuit() : "").append(SEPARADOR)
+                        .append(hActualizado.getPosicionIVA()).append(SEPARADOR)
+                        .append(hActualizado.getFechaNacimiento()).append(SEPARADOR);
+
+                        var d = hActualizado.getDireccion();
+                        sb.append(d.getCalle()).append(SEPARADOR)
+                        .append(d.getNumero()).append(SEPARADOR)
+                        .append(d.getDepartamento()).append(SEPARADOR)
+                        .append(d.getPiso()).append(SEPARADOR)
+                        .append(d.getCodigoPostal()).append(SEPARADOR)
+                        .append(d.getLocalidad()).append(SEPARADOR)
+                        .append(d.getProvincia()).append(SEPARADOR)
+                        .append(d.getPais()).append(SEPARADOR);
+
+                        sb.append(hActualizado.getTelefono()).append(SEPARADOR)
+                        .append(hActualizado.getEmail() != null ? hActualizado.getEmail() : "").append(SEPARADOR)
+                        .append(hActualizado.getOcupacion()).append(SEPARADOR)
+                        .append(hActualizado.getNacionalidad());
+
+                        linea = sb.toString(); // reemplaza la línea
+                    }
+
+                    // Escribimos la línea (modificada o no) en el archivo temporal
                     bw.write(linea);
                     bw.newLine();
                 }
             }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) {
-        e.printStackTrace();
+
+        // Reemplazamos el archivo original por el temporal
+        if (!archivo.delete()) {
+            System.out.println("No se pudo borrar el archivo original.");
+        }
+        if (!archivoTemp.renameTo(archivo)) {
+            System.out.println("No se pudo renombrar el archivo temporal.");
+        }
     }
 
-    //Se reemplaza el archivo original por el temporal
-    if (!archivo.delete()) {
-        System.out.println("No se pudo borrar el archivo original.");
-    }
-    if (!archivoTemp.renameTo(archivo)) {
-        System.out.println("No se pudo renombrar el archivo temporal.");
-    }
-}
 }
