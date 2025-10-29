@@ -66,4 +66,13 @@ public class DireccionDAOImp implements DireccionDAO{
                 .findFirst()
                 .orElse(null);
     }
+    @Override
+    public void modificarDireccion(String calle, String numero, String departamento, String piso, String codigoPostal) {
+        throw new UnsupportedOperationException("modificarDireccion pendiente (no requerido en CU01/CU02)");
+    }
+
+    @Override
+    public void eliminarDireccion(DireccionDTO d) {
+        throw new UnsupportedOperationException("eliminarDireccion pendiente (no requerido en CU01/CU02)");
+    }
 }
