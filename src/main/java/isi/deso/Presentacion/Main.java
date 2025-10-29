@@ -92,6 +92,10 @@ public class Main {
         if (lista.isEmpty()) {
             System.out.println("No existen concordancias para los criterios de búsqueda.");
             // ESPACIO PARA CU09 !!!!!!!!!!!!!!!
+            boolean flag = true;
+            while(flag) {
+                
+            }
             return;
         }
 
