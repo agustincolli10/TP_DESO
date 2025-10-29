@@ -6,13 +6,15 @@ package isi.deso.DAO;
 
 import isi.deso.Modelo.DireccionDTO;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DireccionDAOImp implements DireccionDAO{
     private static final String ARCHIVO = "direccionesCargadas.txt";
     private static final String SEPARADOR = ";";
     @Override
-    public void crearHuesped(DireccionDTO d) {
+    public void crearDireccion(DireccionDTO d) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(ARCHIVO, true))) {
 
             StringBuilder sb = new StringBuilder();
@@ -31,5 +33,37 @@ public class DireccionDAOImp implements DireccionDAO{
             e.printStackTrace();
         }
     }
-    
+    @Override
+    public List<DireccionDTO> obtenerTodos() {
+        List<DireccionDTO> lista = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(SEPARADOR, -1); // -1 para conservar vacíos
+                DireccionDTO dir = new DireccionDTO(
+                    datos[0], datos[1], datos[2], datos[3],
+                    datos[4], datos[5], datos[6], datos[7]
+                );
+                lista.add(dir);
+            }
+        } catch (FileNotFoundException e) {
+            // Si el archivo no existe, se crea vacío al guardar el primero
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+    @Override
+    public DireccionDTO obtenerDireccion(String calle, String numero, String departamento, String piso, String codigoPostal) {
+        return obtenerTodos().stream()
+                .filter(d -> d.getCalle().equalsIgnoreCase(calle)
+                        && d.getNumero().equalsIgnoreCase(numero)
+                        && d.getDepartamento().equalsIgnoreCase(departamento)
+                        && d.getPiso().equalsIgnoreCase(piso)
+                        && d.getCodigoPostal().equalsIgnoreCase(codigoPostal))
+                .findFirst()
+                .orElse(null);
+    }
 }
