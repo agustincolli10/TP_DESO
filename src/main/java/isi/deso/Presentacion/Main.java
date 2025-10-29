@@ -59,8 +59,8 @@ public class Main {
                     System.out.println("ERROR: " + e.getMessage());
                 }
             }
-           
-          
+            
+
             // Menú principal (CU02)
           
             while (true) {
@@ -208,6 +208,8 @@ public class Main {
     
     static void cu10(){
         System.out.println("\nCU10 - Modificar huésped");
+        
+        
                        
     }
 
