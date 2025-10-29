@@ -21,7 +21,7 @@ import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
 
 private static final HuespedDAO huespedDAO = new HuespedDAOImp();
-
+private static final HuespedService huespedService = new HuespedService(huespedDAO);
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
@@ -56,7 +56,7 @@ public class Main {
             }
 
            
-            // Menú principal (CU02)
+            // Menú principal 
            
             while (true) {
                 System.out.println();
@@ -122,90 +122,6 @@ if (sel.isBlank()) {
         catch (Exception e) { return null; }
     }
 
-static void cu09() {
-    System.out.println("\nCU09 - Alta de huésped");
 
-    // Datos personales
-    System.out.print("Nombres: "); String nombres = scanner.nextLine().trim();
-    System.out.print("Apellido: "); String apellido = scanner.nextLine().trim();
-
-    System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO): ");
-    TipoDocumento tipo = parseTipo(scanner.nextLine());
-
-    System.out.print("Número doc: "); String nroDoc = scanner.nextLine().trim();
-
-    System.out.print("CUIT (ENTER si no tiene): "); String cuit = scanner.nextLine().trim();
-    if (cuit.isEmpty()) cuit = null;
-
-    System.out.print("Posición IVA (ResponsableInscripto/Monotributista/Exento/ConsumidorFinal): ");
-    PosicionIVA pos = parsePos(scanner.nextLine());
-
-    System.out.print("Fecha de nacimiento (YYYY-MM-DD): ");
-    java.time.LocalDate fNac = parseFecha(scanner.nextLine());
-
-    // Dirección
-    System.out.println("\n--- Dirección ---");
-    System.out.print("Calle: "); String calle = scanner.nextLine().trim();
-    System.out.print("Número: "); String numero = scanner.nextLine().trim();
-    System.out.print("Departamento: "); String depto = scanner.nextLine().trim();
-    System.out.print("Piso: "); String piso = scanner.nextLine().trim();
-    System.out.print("Código Postal: "); String cp = scanner.nextLine().trim();
-    System.out.print("Localidad: "); String loc = scanner.nextLine().trim();
-    System.out.print("Provincia: "); String prov = scanner.nextLine().trim();
-    System.out.print("País: "); String pais = scanner.nextLine().trim();
-    DireccionDTO dir = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
-
-    // Contacto y otros
-    System.out.println("\n--- Contacto y otros ---");
-    System.out.print("Teléfono: "); String tel = scanner.nextLine().trim();
-    System.out.print("Email (ENTER si no tiene): "); String email = scanner.nextLine().trim();
-    if (email.isEmpty()) email = null;
-    System.out.print("Ocupación: "); String ocu = scanner.nextLine().trim();
-    System.out.print("Nacionalidad: "); String nac = scanner.nextLine().trim();
-
-    // Construir entidad
-    Huesped h = new Huesped(
-        nombres, apellido, tipo, nroDoc, cuit,
-        pos, fNac, dir, tel, email, ocu, nac
-    );
-
-    // Validaciones CU09
-    Validacion v1 = new ValidacionCampos();
-    Validacion v2 = new ValidacionDocumentoUnico(huespedDAO);
-
-    boolean ok = v1.validar(h);
-    if (!ok) { System.out.println(v1.getMensajeError()); return; }
-
-    ok = v2.validar(h);
-    if (!ok) { System.out.println(v2.getMensajeError()); return; }
-
-    // Persistir
-    try {
-        huespedDAO.crearHuesped(h);
-        System.out.println("✅ Huésped dado de alta correctamente.");
-    } catch (Exception e) {
-        System.out.println("❌ Error al guardar el huésped: " + e.getMessage());
-    }
-}
-d) Helpers de parse (agregalos al final del Main)
-java
-Copiar código
-private static PosicionIVA parsePos(String s) {
-    if (s == null || s.isBlank()) return PosicionIVA.ConsumidorFinal;
-    try { return PosicionIVA.valueOf(s.trim().replace(" ", "")); }
-    catch (Exception e) { return PosicionIVA.ConsumidorFinal; }
-}
-
-private static java.time.LocalDate parseFecha(String s) {
-    if (s == null || s.isBlank()) return null;
-    try { return java.time.LocalDate.parse(s.trim()); } // YYYY-MM-DD
-    catch (Exception e) { 
-        // intento dd/MM/yyyy
-        try {
-            java.time.format.DateTimeFormatter f = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            return java.time.LocalDate.parse(s.trim(), f);
-        } catch (Exception ex) { return null; }
-    }
-}
     
 }
