@@ -25,6 +25,7 @@ import isi.deso.DAO.HuespedDAOImp;
 import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
 
+private static final UsuarioDAO usuarioDAO = new UsuarioDAOImpFile();
 private static final HuespedDAO huespedDAO = new HuespedDAOImp();
 private static final HuespedService huespedService = new HuespedService(new HuespedDAOImp());
 
@@ -41,7 +42,7 @@ public class Main {
             System.out.println("BIENVENIDO");
             System.out.println("Ingrese sus datos para continuar\n");
 
-            AuthService auth = new AuthService();
+           AuthService auth = new AuthService(usuarioDAO);
 
             while (true) {
                 System.out.print("Ingresar nombre de usuario: ");
