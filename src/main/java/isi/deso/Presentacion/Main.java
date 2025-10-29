@@ -36,9 +36,9 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            // =========================
+            
             // CU01 - Autenticar usuario
-            // =========================
+     
             System.out.println("BIENVENIDO");
             System.out.println("Ingrese sus datos para continuar\n");
 
@@ -60,9 +60,9 @@ public class Main {
                 }
             }
 
-            // =========================
+          
             // Menú principal (CU02)
-            // =========================
+          
             while (true) {
                 System.out.println();
                 System.out.println("Menú:");
@@ -83,9 +83,9 @@ public class Main {
         }
     }
 
-    // =========================
+   
     // CU02 - Buscar huésped
-    // =========================
+  
     static void cu02() {
         System.out.println("CU02 - Buscar huésped");
 
@@ -131,9 +131,9 @@ public class Main {
         }
     }
 
-    // =========================
+    
     // CU09 - Alta de huésped
-    // =========================
+  
     static void cu09() {
         System.out.println("\nCU09 - Alta de huésped");
 
@@ -175,7 +175,7 @@ public class Main {
         System.out.print("Ocupación: "); String ocu = scanner.nextLine().trim();
         System.out.print("Nacionalidad: "); String nac = scanner.nextLine().trim();
 
-        // Construir entidad (usa tu constructor largo)
+        // Construir entidad 
         Huesped h = new Huesped(
             nombres, apellido, tipo, nroDoc, cuit,
             pos, fNac, dir, tel, email, ocu, nac
@@ -191,7 +191,7 @@ public class Main {
         ok = v2.validar(h);
         if (!ok) { System.out.println(v2.getMensajeError()); return; }
 
-        // Persistir alta
+       
         try {
             huespedDAO.crearHuesped(h);
             System.out.println("✅ Huésped dado de alta correctamente.");
@@ -200,7 +200,7 @@ public class Main {
         }
     }
 
-    // -------- helpers --------
+  
 
     private static TipoDocumento parseTipo(String s) {
         if (s == null || s.isBlank()) return null;
