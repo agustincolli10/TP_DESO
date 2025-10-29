@@ -1,24 +1,33 @@
-
 package isi.deso.Servicio;
-import isi.deso.Excepcion.*;
-import java.io.*; import java.nio.charset.StandardCharsets;
+
+import isi.deso.Excepcion.AutenticacionException;
+import isi.deso.DAO.UsuarioDAO;
+import isi.deso.Modelo.Usuario;
+
+import java.util.Objects;
+
 public class AuthService {
+  private final UsuarioDAO usuarioDAO;
+
+  public AuthService(UsuarioDAO usuarioDAO) {
+    this.usuarioDAO = Objects.requireNonNull(usuarioDAO, "usuarioDAO no puede ser null");
+  }
+
   public void autenticar(String username, String password) {
     if (username == null || password == null || username.isBlank() || password.isBlank()) {
       throw new AutenticacionException("Credenciales incompletas");
     }
-    boolean ok = false;
-    try (InputStream is = getClass().getClassLoader().getResourceAsStream("data/usuarios.csv")) {
-      if (is == null) throw new AutenticacionException("No se encontró usuarios.csv");
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-          if (line.isBlank() || line.startsWith("#")) continue;
-          String[] p = line.split(";", -1);
-          if (p.length >= 2 && p[0].equals(username) && p[1].equals(password)) { ok = true; break; }
-        }
-      }
-    } catch (IOException e) { throw new AutenticacionException("Error leyendo usuarios"); }
+
+    boolean ok = usuarioDAO.listaCompUser().stream()
+        .anyMatch(u -> equalsUser(u, username) && equalsPass(u, password));
+
     if (!ok) throw new AutenticacionException("Usuario o contraseña inválidos");
+  }
+
+  private static boolean equalsUser(Usuario u, String username) {
+    return u.getNUsuario() != null && u.getNUsuario().equals(username);
+  }
+  private static boolean equalsPass(Usuario u, String pass) {
+    return u.getContrasenia() != null && u.getContrasenia().equals(pass);
   }
 }
