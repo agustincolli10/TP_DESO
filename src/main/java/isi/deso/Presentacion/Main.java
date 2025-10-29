@@ -59,7 +59,7 @@ public class Main {
                     System.out.println("ERROR: " + e.getMessage());
                 }
             }
-
+           
           
             // Menú principal (CU02)
           
@@ -67,11 +67,15 @@ public class Main {
                 System.out.println();
                 System.out.println("Menú:");
                 System.out.println("1) CU02 - Buscar huésped");
+                System.out.println("2) CU09 - Dar de alta huésped");
+                System.out.println("3) CU10 - Dar de baja huésped");
                 System.out.println("0) Salir");
                 System.out.print("> ");
                 String op = scanner.nextLine();
                 switch (op) {
                     case "1" -> cu02();
+                    case "2" -> cu09();
+                    case "3" -> cu10();
                     case "0" -> { System.out.println("Fin."); return; }
                     default -> System.out.println("Opción inválida");
                 }
@@ -199,8 +203,20 @@ public class Main {
             System.out.println("❌ Error al guardar el huésped: " + e.getMessage());
         }
     }
+    
+    //CU10 - Modificar Huesped
+    
+    static void cu10(){
+        System.out.println("\nCU10 - Modificar huésped");
+                       
+    }
 
-  
+    //CU11 - Dar baja de Huesped
+    
+    static void cu11(){
+        System.out.println("\nCU11 - Baja de huésped");
+                       
+    }
 
     private static TipoDocumento parseTipo(String s) {
         if (s == null || s.isBlank()) return null;
