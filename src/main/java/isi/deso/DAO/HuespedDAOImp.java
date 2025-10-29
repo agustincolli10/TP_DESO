@@ -55,7 +55,7 @@ public class HuespedDAOImp implements HuespedDAO{
             String linea;
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split(SEPARADOR, -1); // -1 para conservar vacíos
-                if (datos.length >= 20) {
+                if (datos.length >= 19) {
                     // Reconstrucción del objeto
                     DireccionDTO dir = new DireccionDTO(
                         datos[7], datos[8], datos[9], datos[10],

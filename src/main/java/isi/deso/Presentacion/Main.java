@@ -1,5 +1,7 @@
 package isi.deso.Presentacion;
 
+import isi.deso.DAO.DireccionDAO;
+import isi.deso.DAO.DireccionDAOImp;
 import java.util.List;
 import java.util.Scanner;
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ import isi.deso.Modelo.DireccionDTO;
 import isi.deso.Servicio.HuespedService;
 import isi.deso.Servicio.AuthService;
 import isi.deso.Excepcion.AutenticacionException;
+import isi.deso.Gestor.GestorHuesped;
 
 import isi.deso.Strategy.Validacion;
 import isi.deso.Strategy.ValidacionCampos;
@@ -139,69 +142,103 @@ public class Main {
     // CU09 - Alta de huésped
   
     static void cu09() {
-        System.out.println("\nCU09 - Alta de huésped");
+        boolean flag=true;
+        String nombres,apellido,nroDoc,cuit,posicion,calle,numero,depto,piso,cp,loc,prov,pais,tel,email,ocu,nac;
+        TipoDocumento tipo; PosicionIVA pos; LocalDate fNac;
+        while(flag){
+            boolean camposIncompletos=true;
+            DireccionDAO ddao = new DireccionDAOImp();
+            HuespedDAO dao = new HuespedDAOImp();
+            Validacion v1 = new ValidacionCampos();
+            Validacion v2 = new ValidacionDocumentoUnico(dao);
+            Huesped h=null; DireccionDTO dir=null;
+            GestorHuesped g = new GestorHuesped(ddao,dao,v1,v2);
+            while(camposIncompletos){
+                System.out.println("\nCU09 - Alta de huésped");
 
-        // Datos personales
-        System.out.print("Nombres: "); String nombres = scanner.nextLine().trim();
-        System.out.print("Apellido: "); String apellido = scanner.nextLine().trim();
+                // Datos personales
+                System.out.print("Nombres: "); nombres = scanner.nextLine().trim();
+                System.out.print("Apellido: "); apellido = scanner.nextLine().trim();
 
-        System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO): ");
-        TipoDocumento tipo = parseTipo(scanner.nextLine());
+                System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO): ");
+                tipo = parseTipo(scanner.nextLine());
 
-        System.out.print("Número doc: "); String nroDoc = scanner.nextLine().trim();
+                System.out.print("Número doc: "); nroDoc = scanner.nextLine().trim();
+                System.out.print("CUIT (ENTER si no tiene): "); cuit = scanner.nextLine().trim();
+                if (cuit.isEmpty()) cuit = null;
 
-        System.out.print("CUIT (ENTER si no tiene): "); String cuit = scanner.nextLine().trim();
-        if (cuit.isEmpty()) cuit = null;
+                System.out.print("Posición IVA (ResponsableInscripto/Monotributista/Exento/ConsumidorFinal): "); posicion = scanner.next().trim();
+                if (posicion.isEmpty()) posicion = "ConsumidorFinal";
+                pos = parsePos(posicion);
 
-        System.out.print("Posición IVA (ResponsableInscripto/Monotributista/Exento/ConsumidorFinal): ");
-        PosicionIVA pos = parsePos(scanner.nextLine());
+                System.out.print("Fecha de nacimiento (YYYY-MM-DD o dd/MM/yyyy): ");
+                fNac = parseFecha(scanner.nextLine());
 
-        System.out.print("Fecha de nacimiento (YYYY-MM-DD o dd/MM/yyyy): ");
-        LocalDate fNac = parseFecha(scanner.nextLine());
+                // Dirección
+                System.out.println("\n--- Dirección ---");
+                System.out.print("Calle: "); calle = scanner.nextLine().trim();
+                System.out.print("Número: "); numero = scanner.nextLine().trim();
+                System.out.print("Departamento: "); depto = scanner.nextLine().trim();
+                System.out.print("Piso: "); piso = scanner.nextLine().trim();
+                System.out.print("Código Postal: "); cp = scanner.nextLine().trim();
+                System.out.print("Localidad: "); loc = scanner.nextLine().trim();
+                System.out.print("Provincia: "); prov = scanner.nextLine().trim();
+                System.out.print("País: "); pais = scanner.nextLine().trim();
+                DireccionDTO diraux = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
 
-        // Dirección
-        System.out.println("\n--- Dirección ---");
-        System.out.print("Calle: "); String calle = scanner.nextLine().trim();
-        System.out.print("Número: "); String numero = scanner.nextLine().trim();
-        System.out.print("Departamento: "); String depto = scanner.nextLine().trim();
-        System.out.print("Piso: "); String piso = scanner.nextLine().trim();
-        System.out.print("Código Postal: "); String cp = scanner.nextLine().trim();
-        System.out.print("Localidad: "); String loc = scanner.nextLine().trim();
-        System.out.print("Provincia: "); String prov = scanner.nextLine().trim();
-        System.out.print("País: "); String pais = scanner.nextLine().trim();
-        DireccionDTO dir = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
-
-        // Contacto y otros
-        System.out.println("\n--- Contacto y otros ---");
-        System.out.print("Teléfono: "); String tel = scanner.nextLine().trim();
-        System.out.print("Email (ENTER si no tiene): "); String email = scanner.nextLine().trim();
-        if (email.isEmpty()) email = null;
-        System.out.print("Ocupación: "); String ocu = scanner.nextLine().trim();
-        System.out.print("Nacionalidad: "); String nac = scanner.nextLine().trim();
-
-        // Construir entidad 
-        Huesped h = new Huesped(
-            nombres, apellido, tipo, nroDoc, cuit,
-            pos, fNac, dir, tel, email, ocu, nac
-        );
-
-        // Validaciones CU09
-        Validacion v1 = new ValidacionCampos();
-        Validacion v2 = new ValidacionDocumentoUnico(huespedDAO);
-
-        boolean ok = v1.validar(h);
-        if (!ok) { System.out.println(v1.getMensajeError()); return; }
-
-        ok = v2.validar(h);
-        if (!ok) { System.out.println(v2.getMensajeError()); return; }
-
-       
-        try {
-            huespedDAO.crearHuesped(h);
-            System.out.println("✅ Huésped dado de alta correctamente.");
-        } catch (Exception e) {
-            System.out.println("❌ Error al guardar el huésped: " + e.getMessage());
+                // Contacto y otros
+                System.out.println("\n--- Contacto y otros ---");
+                System.out.print("Teléfono: "); tel = scanner.nextLine().trim();
+                System.out.print("Email (ENTER si no tiene): "); email = scanner.nextLine().trim();
+                if (email.isEmpty()) email = null;
+                System.out.print("Ocupación: "); ocu = scanner.nextLine().trim();
+                System.out.print("Nacionalidad: "); nac = scanner.nextLine().trim();
+                System.out.print("Seleccione 1 para continuar o 2 para cancelar: "); String decision = scanner.nextLine().trim();
+                while (!decision.equals("1") && !decision.equals("2")){
+                    decision = scanner.nextLine().trim();
+                }
+                if (decision.equals("1")){
+                    // Construir entidad 
+                    Huesped haux = new Huesped(
+                    nombres, apellido, tipo, nroDoc, cuit,
+                    pos, fNac, dir, tel, email, ocu, nac
+                    );
+                    if(!v1.validar(haux)){
+                        v1.getMensajeError();
+                    } else {
+                        if(!g.ValidacionDocumentoUnico(haux)){
+                            v2.getMensajeError();
+                            System.out.print("Seleccione 1 para aceptar igualmente o 2 para corregir"); decision = scanner.nextLine().trim();
+                            while (!decision.equals("1") && !decision.equals("2")){
+                                decision = scanner.nextLine().trim();
+                            }
+                            if(decision.equals("1")){
+                                camposIncompletos=false; h = haux; dir = diraux;
+                            } else {
+                                // Hacer Foco en TipoDocumento //
+                            }
+                        }
+                    }
+                } else {
+                    flag = false; camposIncompletos=false;
+                }
+            }
+            try {
+                g.crearDireccion(dir);
+                g.crearHuesped(h);
+                System.out.println("✅ Huésped dado de alta correctamente.");
+                System.out.print("¿Desea cargar otro? Responda con SI o NO"); String decision = scanner.nextLine().trim();
+                while(!decision.equals("SI") && !decision.equals("NO")){
+                    decision = scanner.nextLine().trim();
+                }
+                if(decision.equals("NO")){
+                    flag = false;
+                }
+            } catch (Exception e) {
+                System.out.println("❌ Error al guardar el huésped: " + e.getMessage());
+            }
         }
+        
     }
     
     //CU10 - Modificar Huesped
