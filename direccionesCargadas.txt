@@ -1,0 +1,7 @@
+Alvear;1989;NOP;0;3000;Santa Fe;Santa Fe;Argentina
+Brown;3020;NOP;1;3000;Sante Fe;Santa Fe;Argentina
+San Martin;1234;B;5;S3000;Santa Fe;Santa Fe;Argentina
+Rivadavia;2580;NOP;0;C1033;Buenos Aires;CABA;Argentina
+9 de Julio;550;NOP;0;5000;Cordoba;Cordoba;Argentina
+Belgrano;845;A;10;2000;Rosario;Santa Fe;Argentina
+Av. de Mayo;1370;NOP;0;C1085;Buenos Aires;CABA;Argentina
