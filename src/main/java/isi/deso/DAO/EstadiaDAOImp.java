@@ -65,7 +65,7 @@ public class EstadiaDAOImp implements EstadiaDAO {
     }
     
     @Override
-   ublic void modificarEstadia(String idEstadia, Estadia eActualizado) {
+   public void modificarEstadia(String idEstadia, Estadia eActualizado) {
         File origen = new File(ARCHIVO_E);
         File tmp = new File("estadiasCargadas_tmp.txt");
 
@@ -112,4 +112,5 @@ public class EstadiaDAOImp implements EstadiaDAO {
         
     }
 }
+
 
