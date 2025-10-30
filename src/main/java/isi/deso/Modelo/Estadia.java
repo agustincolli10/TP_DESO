@@ -11,6 +11,12 @@ public class Estadia {
    public LocalDate fechaIn, fechaOut;
    public List<Huesped> huespedes;
    
+    public Estadia() {
+    }
+   
+   
+   
+   
    public Estadia(String id, String codR, String codF, int costo, LocalDate fIn, LocalDate fOut, List<Huesped> h){
        this.idEstadia = id;
        this.codReserva = codR;
@@ -64,3 +70,4 @@ public class Estadia {
         this.huespedes = huespedes;
     }
 }
+
