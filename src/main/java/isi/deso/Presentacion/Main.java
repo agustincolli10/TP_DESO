@@ -130,8 +130,10 @@ public class Main {
 
         try {
             int idx = Integer.parseInt(sel) - 1;
-            System.out.println("Seleccionado: " + lista.get(idx));
-            System.out.println("Simular CU10: Modificar huésped.");
+           Huesped seleccionado = lista.get(idx);
+           System.out.println("Seleccionado: " + seleccionado);
+           cu10(); 
+
         } catch (Exception e) {
             System.out.println("Selección invalida: alta.");
             cu09();
@@ -148,7 +150,7 @@ public class Main {
         while(flag){
             boolean camposIncompletos=true;
             DireccionDAO ddao = new DireccionDAOImp();
-            HuespedDAO dao = new HuespedDAOImp();
+            HuespedDAO dao = huespedDAO;
             Validacion v1 = new ValidacionCampos();
             Validacion v2 = new ValidacionDocumentoUnico(dao);
             Huesped h=null; DireccionDTO dir=null;
@@ -206,10 +208,10 @@ public class Main {
                     );
                     
                     if(!v1.validar(haux)){
-                        v1.getMensajeError();
+                        System.out.println(v1.getMensajeError());
                     } else {
                         if(!g.ValidacionDocumentoUnico(haux)){
-                            v2.getMensajeError();
+                            System.out.println(v2.getMensajeError());
                             System.out.print("Seleccione 1 para aceptar igualmente o 2 para corregir: "); decision = scanner.nextLine().trim();
                             while (!decision.equals("1") && !decision.equals("2")){
                                 decision = scanner.nextLine().trim();
@@ -359,7 +361,7 @@ static void cu10() {
             nac
     );
 
-  // validacion (la mismas q para cu90)
+  // validacion (la mismas q para cu9)
     Validacion v1 = new ValidacionCampos();
     if (!v1.validar(actualizado)) {
         System.out.println(v1.getMensajeError());
@@ -376,7 +378,7 @@ static void cu10() {
         }
     }
 
-    // 6) persistir en el txt
+    //  persistir en el txt
     try {
         huespedDAO.modificarHuesped(tipoOriginal, nroOriginal, actualizado);
         System.out.println("✅ Huesped modificado correctamente.");
