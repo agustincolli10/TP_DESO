@@ -1,0 +1,7 @@
+Colli;Agustin;DNI;45952135;20459521350;Exento;2004-06-10;Alvear;1989;NOP;0;3000;Santa Fe;Santa Fe;Argentina;3425110130;agustincolli10@gmail.com;Mecanico;Argentino
+Kurganoff;Alejandro;LE;10101010;;Monotributista;2003-10-01;Brown;3020;NOP;1;3000;Sante Fe;Santa Fe;Argentina;342567676;;Desocupado;Argentino
+Gomez;Carlos;DNI;28123456;20-28123456-7;Monotributista;1980-05-15;San Martin;1234;B;5;S3000;Santa Fe;Santa Fe;Argentina;543424123456;carlos.gomez@email.com;Arquitecto;Argentino
+Rodriguez;Maria Laura;DNI;42987654;27-42987654-1;ConsumidorFinal;2000-11-20;Rivadavia;2580;NOP;0;C1033;Buenos Aires;CABA;Argentina;541155554444;marialau.r@email.com;Estudiante;Argentina
+Silva;João;PASAPORTE;BR9876543;;ConsumidorFinal;1995-02-10;9 de Julio;550;NOP;0;5000;Cordoba;Cordoba;Argentina;5521987654321;joao.silva@email.br;Turista;Brasileño
+Martinez;Ricardo;DNI;24555888;20-24555888-3;ResponsableInscripto;1975-09-03;Belgrano;845;A;10;2000;Rosario;Santa Fe;Argentina;543416123789;ricardo.martinez@suempresa.com;Comerciante;Argentino
+Schmidt;Anja;PASAPORTE;DE1234567;;ConsumidorFinal;1992-07-22;Av. de Mayo;1370;NOP;0;C1085;Buenos Aires;CABA;Argentina;4917612345678;anja.schmidt@email.de;Ingeniera;Alemana
