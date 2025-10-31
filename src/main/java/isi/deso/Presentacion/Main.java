@@ -2,130 +2,134 @@ package isi.deso.Presentacion;
 
 import isi.deso.DAO.DireccionDAO;
 import isi.deso.DAO.DireccionDAOImp;
-import isi.deso.DAO.EstadiaDAOImp;
-import java.util.List;
-import java.util.Scanner;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import isi.deso.DAO.HuespedDAO;
 import isi.deso.DAO.HuespedDAOImp;
 import isi.deso.DAO.UsuarioDAO;
 import isi.deso.DAO.UsuarioDAOImpFile;
+import isi.deso.DAO.EstadiaDAO;
+import isi.deso.DAO.EstadiaDAOImp;
 
 import isi.deso.Modelo.Huesped;
 import isi.deso.Modelo.TipoDocumento;
 import isi.deso.Modelo.PosicionIVA;
 import isi.deso.Modelo.DireccionDTO;
+import isi.deso.Modelo.Estadia;
 
 import isi.deso.Servicio.HuespedService;
 import isi.deso.Servicio.AuthService;
 import isi.deso.Excepcion.AutenticacionException;
 import isi.deso.Gestor.GestorHuesped;
-import isi.deso.Modelo.Estadia;
 
 import isi.deso.Strategy.Validacion;
 import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
+
+import java.util.List;
+import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class Main {
     
-
+    // lee por consola
     private static final Scanner scanner = new Scanner(System.in);
 
-   
-    private static final HuespedDAO huespedDAO = new HuespedDAOImp();               // huespedesCargados.txt
-    private static final UsuarioDAO usuarioDAO = new UsuarioDAOImpFile();           
-
-    
+    // dao de huesped → txt
+    private static final HuespedDAO huespedDAO = new HuespedDAOImp();     // huespedesCargados.txt
+    // dao de usuario → txt
+    private static final UsuarioDAO usuarioDAO = new UsuarioDAOImpFile();          
+    // dao de estadia → txt (usa el dao de huesped para reconstruir)
+    private static final EstadiaDAO estadiaDAO = new EstadiaDAOImp(huespedDAO);
+    // servicio que busca con filtros
     private static final HuespedService huespedService = new HuespedService(huespedDAO);
 
     public static void main(String[] args) {
         try {
-            
-            // CU01 - Autenticar usuario
-     
+            // cu01 - login
             System.out.println("BIENVENIDO");
-            System.out.println("Ingrese sus datos para continuar\n");
+            System.out.println("ingrese sus datos para continuar\n");
 
             AuthService auth = new AuthService(usuarioDAO);
 
+            // bucle hasta que loguea
             while (true) {
-                System.out.print("Ingresar nombre de usuario: ");
+                System.out.print("ingresar nombre de usuario: ");
                 String nombreUs = scanner.nextLine();
 
-                System.out.print("Ingresar contrasenia: ");
+                System.out.print("ingresar contrasenia: ");
                 String contrasenia = scanner.nextLine();
 
                 try {
-                    auth.autenticar(nombreUs, contrasenia); // valida contra usuariosCargados.txt
-                    System.out.println("Usuario validado\n");
+                    // valida contra usuariosCargados.txt
+                    auth.autenticar(nombreUs, contrasenia);
+                    System.out.println("usuario validado\n");
                     break;
                 } catch (AutenticacionException e) {
-                    System.out.println("ERROR: " + e.getMessage());
+                    System.out.println("error: " + e.getMessage());
                 }
             }
             
-
-            // Menú principal (CU02)
-          
+            // menú principal
             while (true) {
                 System.out.println();
-                System.out.println("Menu:");
-                System.out.println("1) Buscar huesped");
-                System.out.println("2) Dar de alta huesped");
-                System.out.println("3) Modificar huesped");
-                System.out.println("0) Salir");
+                System.out.println("menu:");
+                System.out.println("1) buscar huesped");
+                System.out.println("2) dar de alta huesped");
+                System.out.println("3) modificar huesped");
+                System.out.println("4) registrar estadia");
+                System.out.println("0) salir");
                 System.out.print("> ");
                 String op = scanner.nextLine();
                 switch (op) {
                     case "1" -> cu02();
                     case "2" -> cu09();
                     case "3" -> cu10();
-                    case "0" -> { System.out.println("Fin."); return; }
-                    default -> System.out.println("Opcion invalida");
+                    case "4" -> cu11();    // registra estadia
+                    case "0" -> { System.out.println("fin."); return; }
+                    default -> System.out.println("opcion invalida");
                 }
             }
 
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
-            System.out.println("Fin.");
+            System.err.println("error: " + e.getMessage());
+            System.out.println("fin.");
         }
     }
 
-   
-    // CU02 - Buscar huésped
-  
+    // cu02 - buscar huesped
     static void cu02() {
-        System.out.println("CU02 - Buscar huesped");
+        System.out.println("cu02 - buscar huesped");
 
-        System.out.print("Apellido empieza con (ENTER salta): ");
+        // pide filtros
+        System.out.print("apellido empieza con (enter salta): ");
         String ap = scanner.nextLine();
 
-        System.out.print("Nombres empieza con (ENTER salta): ");
+        System.out.print("nombres empieza con (enter salta): ");
         String no = scanner.nextLine();
 
-        System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO) o ENTER: ");
+        System.out.print("tipo doc (dni/le/lc/pasaporte/otro) o enter: ");
         String t = scanner.nextLine();
         TipoDocumento tipo = parseTipo(t);
 
-        System.out.print("Numero doc (ENTER salta): ");
+        System.out.print("numero doc (enter salta): ");
         String nro = scanner.nextLine();
 
+        // busca en servicio (lee de txt)
         List<Huesped> lista = huespedService.buscar(ap, no, tipo, nro);
 
         if (lista.isEmpty()) {
-            System.out.println("No existen concordancias para los criterios de busqueda.");
+            System.out.println("no existen concordancias para los criterios de busqueda.");
             cu09(); // alta directa si no hay resultados
             return;
         }
 
+        // muestra lista
         for (int i = 0; i < lista.size(); i++) {
             System.out.printf("[%d] %s%n", i + 1, lista.get(i));
         }
 
-        System.out.print("Seleccione nro. de huesped (Enter vacio = dar de alta): ");
+        System.out.print("seleccione nro. de huesped (enter vacio = dar de alta): ");
         String sel = scanner.nextLine();
         if (sel.isBlank()) {
             cu09(); // alta si el usuario no selecciona ninguno
@@ -134,284 +138,377 @@ public class Main {
 
         try {
             int idx = Integer.parseInt(sel) - 1;
-           Huesped seleccionado = lista.get(idx);
-           System.out.println("Seleccionado: " + seleccionado);
-           cu10(); 
+            Huesped seleccionado = lista.get(idx);
+            System.out.println("seleccionado: " + seleccionado);
+            // desde la busqueda lo mando a modificar
+            cu10(); 
 
         } catch (Exception e) {
-            System.out.println("Selección invalida: alta.");
+            System.out.println("seleccion invalida: alta.");
             cu09();
         }
     }
 
-    
-    // CU09 - Alta de huésped
-  
+    // cu09 - alta de huésped
     static void cu09() {
-        boolean flag=true;
-        String nombres,apellido,nroDoc,cuit,posicion,calle,numero,depto,piso,cp,loc,prov,pais,tel,email,ocu,nac;
-        TipoDocumento tipo; PosicionIVA pos; LocalDate fNac;
-        while(flag){
-            boolean camposIncompletos=true;
+        boolean flag = true;
+        // variables para leer
+        String nombres, apellido, nroDoc, cuit, posicion, calle, numero, depto, piso, cp, loc, prov, pais, tel, email, ocu, nac;
+        TipoDocumento tipo; 
+        PosicionIVA pos; 
+        LocalDate fNac;
+        while (flag) {
+            boolean camposIncompletos = true;
             DireccionDAO ddao = new DireccionDAOImp();
+            // usa el mismo dao global de huesped
             HuespedDAO dao = huespedDAO;
             Validacion v1 = new ValidacionCampos();
             Validacion v2 = new ValidacionDocumentoUnico(dao);
-            Huesped h=null; DireccionDTO dir=null;
-            GestorHuesped g = new GestorHuesped(ddao,dao,v1,v2);
-            while(camposIncompletos){
-                System.out.println("\nCU09 - Alta de huesped");
+            Huesped h = null; 
+            DireccionDTO dir = null;
+            // gestor que coordina dao + validaciones
+            GestorHuesped g = new GestorHuesped(ddao, dao, v1, v2);
 
-                // Datos personales
-                System.out.print("Nombres: "); nombres = scanner.nextLine().trim();
-                System.out.print("Apellido: "); apellido = scanner.nextLine().trim();
+            while (camposIncompletos) {
+                System.out.println("\ncu09 - alta de huesped");
 
-                System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO): ");
+                // datos personales
+                System.out.print("nombres: "); nombres = scanner.nextLine().trim();
+                System.out.print("apellido: "); apellido = scanner.nextLine().trim();
+
+                System.out.print("tipo doc (dni/le/lc/pasaporte/otro): ");
                 tipo = parseTipo(scanner.nextLine());
 
-                System.out.print("Numero doc: "); nroDoc = scanner.nextLine().trim();
-                System.out.print("CUIT (ENTER si no tiene): "); cuit = scanner.nextLine().trim();
+                System.out.print("numero doc: "); nroDoc = scanner.nextLine().trim();
+                System.out.print("cuit (enter si no tiene): "); cuit = scanner.nextLine().trim();
                 if (cuit.isEmpty()) cuit = null;
 
-                System.out.print("Posicion IVA (ResponsableInscripto/Monotributista/Exento/ConsumidorFinal): "); posicion = scanner.nextLine().trim();
+                System.out.print("posicion iva (responsableinscripto/monotributista/exento/consumidorfinal): "); 
+                posicion = scanner.nextLine().trim();
                 if (posicion.isEmpty()) posicion = "ConsumidorFinal";
                 pos = parsePos(posicion);
 
-                System.out.print("Fecha de nacimiento (YYYY-MM-DD o dd/MM/yyyy): ");
+                System.out.print("fecha de nacimiento (yyyy-mm-dd o dd/mm/yyyy): ");
                 fNac = parseFecha(scanner.nextLine());
 
-                // Dirección
-                System.out.println("\n--- Direccion ---");
-                System.out.print("Calle: "); calle = scanner.nextLine().trim();
-                System.out.print("Numero: "); numero = scanner.nextLine().trim();
-                System.out.print("Departamento: "); depto = scanner.nextLine().trim();
-                System.out.print("Piso: "); piso = scanner.nextLine().trim();
-                System.out.print("Codigo Postal: "); cp = scanner.nextLine().trim();
-                System.out.print("Localidad: "); loc = scanner.nextLine().trim();
-                System.out.print("Provincia: "); prov = scanner.nextLine().trim();
-                System.out.print("Pais: "); pais = scanner.nextLine().trim();
+                // direccion
+                System.out.println("\n--- direccion ---");
+                System.out.print("calle: "); calle = scanner.nextLine().trim();
+                System.out.print("numero: "); numero = scanner.nextLine().trim();
+                System.out.print("departamento: "); depto = scanner.nextLine().trim();
+                System.out.print("piso: "); piso = scanner.nextLine().trim();
+                System.out.print("codigo postal: "); cp = scanner.nextLine().trim();
+                System.out.print("localidad: "); loc = scanner.nextLine().trim();
+                System.out.print("provincia: "); prov = scanner.nextLine().trim();
+                System.out.print("pais: "); pais = scanner.nextLine().trim();
                 DireccionDTO diraux = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
                 
-                // Contacto y otros
-                System.out.println("\n--- Contacto y otros ---");
-                System.out.print("Telefono: "); tel = scanner.nextLine().trim();
-                System.out.print("Email (ENTER si no tiene): "); email = scanner.nextLine().trim();
+                // contacto y otros
+                System.out.println("\n--- contacto y otros ---");
+                System.out.print("telefono: "); tel = scanner.nextLine().trim();
+                System.out.print("email (enter si no tiene): "); email = scanner.nextLine().trim();
                 if (email.isEmpty()) email = null;
-                System.out.print("Ocupacion: "); ocu = scanner.nextLine().trim();
-                System.out.print("Nacionalidad: "); nac = scanner.nextLine().trim();
+                System.out.print("ocupacion: "); ocu = scanner.nextLine().trim();
+                System.out.print("nacionalidad: "); nac = scanner.nextLine().trim();
                 
-                System.out.print("Seleccione 1 para continuar o 2 para cancelar: "); String decision = scanner.nextLine().trim();
-                while (!decision.equals("1") && !decision.equals("2")){
+                System.out.print("seleccione 1 para continuar o 2 para cancelar: "); 
+                String decision = scanner.nextLine().trim();
+                while (!decision.equals("1") && !decision.equals("2")) {
                     decision = scanner.nextLine().trim();
                 }
-                if (decision.equals("1")){
-                    // Construir entidad 
+                if (decision.equals("1")) {
+                    // construir entidad 
                     Huesped haux = new Huesped(
-                    nombres, apellido, tipo, nroDoc, cuit,
-                    pos, fNac, diraux, tel, email, ocu, nac
+                        nombres, apellido, tipo, nroDoc, cuit,
+                        pos, fNac, diraux, tel, email, ocu, nac
                     );
                     
-                    if(!v1.validar(haux)){
+                    if (!v1.validar(haux)) {
                         System.out.println(v1.getMensajeError());
                     } else {
-                        if(!g.ValidacionDocumentoUnico(haux)){
+                        if (!g.ValidacionDocumentoUnico(haux)) {
                             System.out.println(v2.getMensajeError());
-                            System.out.print("Seleccione 1 para aceptar igualmente o 2 para corregir: "); decision = scanner.nextLine().trim();
-                            while (!decision.equals("1") && !decision.equals("2")){
+                            System.out.print("seleccione 1 para aceptar igualmente o 2 para corregir: "); 
+                            decision = scanner.nextLine().trim();
+                            while (!decision.equals("1") && !decision.equals("2")) {
                                 decision = scanner.nextLine().trim();
                             }
-                            if(decision.equals("1")){
-                                camposIncompletos=false; h = haux; dir = diraux;
+                            if (decision.equals("1")) {
+                                camposIncompletos = false; 
+                                h = haux; 
+                                dir = diraux;
                             } else {
-                                // Hacer Foco en TipoDocumento //
+                                // hacer foco en tipodocumento
                             }
-                        }else { 
-                            System.out.println("--Ambas validaciones fueron exitosas. Preparando para guardar.--");
+                        } else { 
+                            System.out.println("--ambas validaciones fueron exitosas. guardando.--");
                             camposIncompletos = false; 
                             h = haux;
                             dir = diraux;
                         }
                     }
                 } else {
-                    flag = false; camposIncompletos=false;
+                    flag = false; 
+                    camposIncompletos = false;
                 }
             }
             try {
                 g.crearDireccion(dir);
                 g.crearHuesped(h);
-                System.out.println("---Huesped dado de alta correctamente.---");
-                System.out.print("¿Desea cargar otro? Responda con SI o NO: "); String decision = scanner.nextLine().trim();
-                while(!decision.equals("SI") && !decision.equals("NO")){
-                    decision = scanner.nextLine().trim();
+                System.out.println("---huesped dado de alta correctamente.---");
+                System.out.print("¿desea cargar otro? (si/no): "); 
+                String decision = scanner.nextLine().trim().toUpperCase();
+                while (!decision.equals("SI") && !decision.equals("NO")) {
+                    decision = scanner.nextLine().trim().toUpperCase();
                 }
-                if(decision.equals("NO")){
+                if (decision.equals("NO")) {
                     flag = false;
                 }
             } catch (Exception e) {
-                System.out.println("---Error al guardar el huésped: " + e.getMessage());
+                System.out.println("---error al guardar el huésped: " + e.getMessage());
             }
         }
-        
     }
     
-   
-    
-// CU10 - Modificar Huesped
-static void cu10() {
-    System.out.println("\nCU10 - Modificar huesped");
+    // cu10 - modificar huesped
+    static void cu10() {
+        System.out.println("\ncu10 - modificar huesped");
 
-    //  buscar primero (como en cu02)
-    System.out.print("Apellido empieza con (ENTER salta): ");
-    String ap = scanner.nextLine();
+        // busca primero (mismo estilo q cu02)
+        System.out.print("apellido empieza con (enter salta): ");
+        String ap = scanner.nextLine();
 
-    System.out.print("Nombres empieza con (ENTER salta): ");
-    String no = scanner.nextLine();
+        System.out.print("nombres empieza con (enter salta): ");
+        String no = scanner.nextLine();
 
-    System.out.print("Tipo doc (DNI/LE/LC/PASAPORTE/OTRO) o ENTER: ");
-    String t = scanner.nextLine();
-    TipoDocumento tipoBusq = parseTipo(t);
+        System.out.print("tipo doc (dni/le/lc/pasaporte/otro) o enter: ");
+        String t = scanner.nextLine();
+        TipoDocumento tipoBusq = parseTipo(t);
 
-    System.out.print("Numero doc (ENTER salta): ");
-    String nroBusq = scanner.nextLine();
+        System.out.print("numero doc (enter salta): ");
+        String nroBusq = scanner.nextLine();
 
-    List<Huesped> lista = huespedService.buscar(ap, no, tipoBusq, nroBusq);
-    if (lista.isEmpty()) {
-        System.out.println("No se encontraron huespedes para modificar.");
-        return;
-    }
-
-    for (int i = 0; i < lista.size(); i++) {
-        System.out.printf("[%d] %s%n", i + 1, lista.get(i));
-    }
-
-    System.out.print("Seleccione nro de huesped a modificar: ");
-    String sel = scanner.nextLine();
-    int idx;
-    try {
-        idx = Integer.parseInt(sel) - 1;
-    } catch (Exception e) {
-        System.out.println("Seleccion invalida.");
-        return;
-    }
-    if (idx < 0 || idx >= lista.size()) {
-        System.out.println("Seleccion fuera de rango.");
-        return;
-    }
-
-    Huesped orig = lista.get(idx);
-
-    // clave original (la que está en el txt)
-    TipoDocumento tipoOriginal = orig.getTipoDocumento();
-    String nroOriginal = orig.getNumeroDocumento();
-
-    System.out.println("Deje vacio para mantener el valor actual.");
-
-    // pido nuevos cambiod pero si aprieta enter mantiene los mismos
-    String nuevoNombre   = leerConDefault("Nombres", orig.getNombres());
-    String nuevoApellido = leerConDefault("Apellido", orig.getApellido());
-
-    System.out.print("Tipo doc (" + mostrarTipo(orig.getTipoDocumento()) + "): ");
-    String tdNuevoStr = scanner.nextLine();
-    TipoDocumento nuevoTipo = tdNuevoStr.isBlank() ? orig.getTipoDocumento() : parseTipo(tdNuevoStr);
-
-    System.out.print("Numero doc (" + noNull(orig.getNumeroDocumento()) + "): ");
-    String nroNuevoStr = scanner.nextLine();
-    String nuevoNro = nroNuevoStr.isBlank() ? orig.getNumeroDocumento() : nroNuevoStr.trim();
-
-    String nuevoCuit = leerConDefault("CUIT", noNull(orig.getCuit()));
-
-    System.out.print("Posicion IVA (" + noNull(orig.getPosicionIVA() != null ? orig.getPosicionIVA().name() : null) + "): ");
-    String posStr = scanner.nextLine();
-    PosicionIVA nuevaPos = posStr.isBlank() ? orig.getPosicionIVA() : parsePos(posStr);
-
-    System.out.print("Fecha de nacimiento (" + (orig.getFechaNacimiento() != null ? orig.getFechaNacimiento().toString() : "") + "): ");
-    String fStr = scanner.nextLine();
-    LocalDate nuevaFecha = fStr.isBlank() ? orig.getFechaNacimiento() : parseFecha(fStr);
-
-    
-    DireccionDTO dirOrig = orig.getDireccion();
-    if (dirOrig == null) {
-        dirOrig = new DireccionDTO("","","","","","","","");
-    }
-
-    String calle = leerConDefault("Calle", dirOrig.getCalle());
-    String numero = leerConDefault("Numero", dirOrig.getNumero());
-    String depto = leerConDefault("Departamento", dirOrig.getDepartamento());
-    String piso = leerConDefault("Piso", dirOrig.getPiso());
-    String cp = leerConDefault("Codigo Postal", dirOrig.getCodigoPostal());
-    String loc = leerConDefault("Localidad", dirOrig.getLocalidad());
-    String prov = leerConDefault("Provincia", dirOrig.getProvincia());
-    String pais = leerConDefault("Pais", dirOrig.getPais());
-    DireccionDTO dirNueva = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
-
-    String tel = leerConDefault("Telefono", noNull(orig.getTelefono()));
-    String email = leerConDefault("Email", noNull(orig.getEmail()));
-    String ocu = leerConDefault("Ocupacion", noNull(orig.getOcupacion()));
-    String nac = leerConDefault("Nacionalidad", noNull(orig.getNacionalidad()));
-
-    // armo el huesped act
-    Huesped actualizado = new Huesped(
-            nuevoNombre,
-            nuevoApellido,
-            nuevoTipo,
-            nuevoNro,
-            nuevoCuit,
-            nuevaPos,
-            nuevaFecha,
-            dirNueva,
-            tel,
-            email,
-            ocu,
-            nac
-    );
-
-  // validacion (la mismas q para cu9)
-    Validacion v1 = new ValidacionCampos();
-    if (!v1.validar(actualizado)) {
-        System.out.println(v1.getMensajeError());
-        return;
-    }
-
-    // chequea q no exista otro igual si cambio la clave
-    boolean cambioClave = !(igualesTipo(tipoOriginal, nuevoTipo) && igualesStr(nroOriginal, nuevoNro));
-    if (cambioClave) {
-        Validacion v2 = new ValidacionDocumentoUnico(huespedDAO);
-        if (!v2.validar(actualizado)) {
-            System.out.println(v2.getMensajeError());
+        List<Huesped> lista = huespedService.buscar(ap, no, tipoBusq, nroBusq);
+        if (lista.isEmpty()) {
+            System.out.println("no se encontraron huespedes para modificar.");
             return;
         }
-    }
-    
-    System.out.println("Seleccione una opcion:");
-    System.out.println("1) Siguiente");
-    System.out.println("2) Cancelar modificacion");
-    System.out.println("3) Borrar huesped");
-    System.out.print("> ");
-    String valorSel = scanner.nextLine();
-    switch (valorSel) {
-        case "1" -> {
-            try {
-               huespedDAO.modificarHuesped(tipoOriginal, nroOriginal, actualizado);
-               System.out.println("Huesped modificado correctamente.");
-            } catch (Exception e) {
-            System.out.println("Error al modificar el huesped: " + e.getMessage());
+
+        for (int i = 0; i < lista.size(); i++) {
+            System.out.printf("[%d] %s%n", i + 1, lista.get(i));
+        }
+
+        System.out.print("seleccione nro de huesped a modificar: ");
+        String sel = scanner.nextLine();
+        int idx;
+        try {
+            idx = Integer.parseInt(sel) - 1;
+        } catch (Exception e) {
+            System.out.println("seleccion invalida.");
+            return;
+        }
+        if (idx < 0 || idx >= lista.size()) {
+            System.out.println("seleccion fuera de rango.");
+            return;
+        }
+
+        Huesped orig = lista.get(idx);
+
+        // clave original (la que está en el txt)
+        TipoDocumento tipoOriginal = orig.getTipoDocumento();
+        String nroOriginal = orig.getNumeroDocumento();
+
+        System.out.println("deje vacio para mantener el valor actual.");
+
+        // datos nuevos
+        String nuevoNombre   = leerConDefault("nombres", orig.getNombres());
+        String nuevoApellido = leerConDefault("apellido", orig.getApellido());
+
+        System.out.print("tipo doc (" + mostrarTipo(orig.getTipoDocumento()) + "): ");
+        String tdNuevoStr = scanner.nextLine();
+        TipoDocumento nuevoTipo = tdNuevoStr.isBlank() ? orig.getTipoDocumento() : parseTipo(tdNuevoStr);
+
+        System.out.print("numero doc (" + noNull(orig.getNumeroDocumento()) + "): ");
+        String nroNuevoStr = scanner.nextLine();
+        String nuevoNro = nroNuevoStr.isBlank() ? orig.getNumeroDocumento() : nroNuevoStr.trim();
+
+        String nuevoCuit = leerConDefault("cuit", noNull(orig.getCuit()));
+
+        System.out.print("posicion iva (" + noNull(orig.getPosicionIVA() != null ? orig.getPosicionIVA().name() : null) + "): ");
+        String posStr = scanner.nextLine();
+        PosicionIVA nuevaPos = posStr.isBlank() ? orig.getPosicionIVA() : parsePos(posStr);
+
+        System.out.print("fecha de nacimiento (" + (orig.getFechaNacimiento() != null ? orig.getFechaNacimiento().toString() : "") + "): ");
+        String fStr = scanner.nextLine();
+        LocalDate nuevaFecha = fStr.isBlank() ? orig.getFechaNacimiento() : parseFecha(fStr);
+
+        // direccion
+        DireccionDTO dirOrig = orig.getDireccion();
+        if (dirOrig == null) {
+            dirOrig = new DireccionDTO("","","","","","","","");
+        }
+
+        String calle = leerConDefault("calle", dirOrig.getCalle());
+        String numero = leerConDefault("numero", dirOrig.getNumero());
+        String depto = leerConDefault("departamento", dirOrig.getDepartamento());
+        String piso = leerConDefault("piso", dirOrig.getPiso());
+        String cp = leerConDefault("codigo postal", dirOrig.getCodigoPostal());
+        String loc = leerConDefault("localidad", dirOrig.getLocalidad());
+        String prov = leerConDefault("provincia", dirOrig.getProvincia());
+        String pais = leerConDefault("pais", dirOrig.getPais());
+        DireccionDTO dirNueva = new DireccionDTO(calle, numero, depto, piso, cp, loc, prov, pais);
+
+        String tel = leerConDefault("telefono", noNull(orig.getTelefono()));
+        String email = leerConDefault("email", noNull(orig.getEmail()));
+        String ocu = leerConDefault("ocupacion", noNull(orig.getOcupacion()));
+        String nac = leerConDefault("nacionalidad", noNull(orig.getNacionalidad()));
+
+        // armo el huesped actualizado
+        Huesped actualizado = new Huesped(
+                nuevoNombre,
+                nuevoApellido,
+                nuevoTipo,
+                nuevoNro,
+                nuevoCuit,
+                nuevaPos,
+                nuevaFecha,
+                dirNueva,
+                tel,
+                email,
+                ocu,
+                nac
+        );
+
+        // validacion basica
+        Validacion v1 = new ValidacionCampos();
+        if (!v1.validar(actualizado)) {
+            System.out.println(v1.getMensajeError());
+            return;
+        }
+
+        // si cambió la clave (tipo+num), controlo unicidad
+        boolean cambioClave = !(igualesTipo(tipoOriginal, nuevoTipo) && igualesStr(nroOriginal, nuevoNro));
+        if (cambioClave) {
+            Validacion v2 = new ValidacionDocumentoUnico(huespedDAO);
+            if (!v2.validar(actualizado)) {
+                System.out.println(v2.getMensajeError());
+                return;
             }
         }
-        case "2" -> {return;}
-        case "3" -> cu11();
-        default -> System.out.println("Opcion invalida");
-    }
-
-    
-}
-
-
-    //CU11 - Dar baja de Huesped
-    
-    static void cu11(){
-        System.out.println("\nCU11 - Baja de huesped");
         
+        System.out.println("seleccione una opcion:");
+        System.out.println("1) guardar modificacion");
+        System.out.println("2) cancelar modificacion");
+        System.out.println("3) borrar huesped");
+        System.out.print("> ");
+        String valorSel = scanner.nextLine();
+        switch (valorSel) {
+            case "1" -> {
+                try {
+                    huespedDAO.modificarHuesped(tipoOriginal, nroOriginal, actualizado);
+                    System.out.println("huesped modificado correctamente.");
+                } catch (Exception e) {
+                    System.out.println("error al modificar el huesped: " + e.getMessage());
+                }
+            }
+            case "2" -> { return; }
+            case "3" -> {
+                // llamo al cu11 para cargar estadia
+                cu11();
+            }
+            default -> System.out.println("opcion invalida");
+        }
     }
+
+    // cu11 - registrar estadia
+    static void cu11() {
+        System.out.println("\ncu11 - registrar estadia");
+
+        // datos basicos
+        System.out.print("id de estadia: ");
+        String id = scanner.nextLine().trim();
+        if (id.isEmpty()) {
+            System.out.println("el id de la estadia es obligatorio.");
+            return;
+        }
+
+        // si ya existe, aviso
+        Estadia existente = estadiaDAO.obtenerEstadia(id);
+        if (existente != null) {
+            System.out.println("ya existe una estadia con ese id. use modificarEstadia si corresponde.");
+            return;
+        }
+
+        System.out.print("codigo de reserva (enter si no tiene): ");
+        String codRes = scanner.nextLine().trim();
+
+        System.out.print("codigo de factura (enter si no tiene): ");
+        String codFac = scanner.nextLine().trim();
+
+        System.out.print("costo (puede ser numero o texto): ");
+        String costo = scanner.nextLine().trim();
+
+        System.out.print("fecha ingreso (yyyy-mm-dd o dd/mm/yyyy): ");
+        LocalDate fIn = parseFecha(scanner.nextLine());
+
+        System.out.print("fecha salida (yyyy-mm-dd o dd/mm/yyyy): ");
+        LocalDate fOut = parseFecha(scanner.nextLine());
+
+        // lista de huespedes de la estadia
+        List<Huesped> huespedes = new ArrayList<>();
+
+        System.out.println("\n--- agregar huespedes a la estadia (max 5) ---");
+        boolean seguir = true;
+        while (seguir && huespedes.size() < 5) {
+
+            System.out.print("tipo doc huesped (dni/le/lc/pasaporte/otro): ");
+            TipoDocumento t = parseTipo(scanner.nextLine());
+
+            System.out.print("numero doc huesped: ");
+            String ndoc = scanner.nextLine().trim();
+
+            if (t == null || ndoc.isEmpty()) {
+                System.out.println("tipo o numero vacio, no se agrega.");
+            } else {
+                Huesped h = huespedDAO.obtenerHuesped(t, ndoc);
+                if (h == null) {
+                    System.out.println("no existe un huesped con ese documento. debe darlo de alta primero (cu09).");
+                } else {
+                    huespedes.add(h);
+                    System.out.println("huesped agregado: " + h);
+                }
+            }
+
+            if (huespedes.size() < 5) {
+                System.out.print("¿agregar otro huesped? (si/no): ");
+                String r = scanner.nextLine().trim().toUpperCase();
+                seguir = r.equals("SI");
+            } else {
+                System.out.println("se alcanzo el maximo de 5 huespedes.");
+            }
+        }
+
+        // armo objeto
+        Estadia nueva = new Estadia(
+                id,
+                codRes,
+                codFac,
+                costo,
+                fIn,
+                fOut,
+                huespedes
+        );
+
+        // guardo en txt
+        try {
+            estadiaDAO.crearEstadia(nueva);
+            System.out.println("✅ estadia registrada correctamente.");
+        } catch (Exception e) {
+            System.out.println("❌ error al registrar la estadia: " + e.getMessage());
+        }
+    }
+
+    // helpers
 
     private static TipoDocumento parseTipo(String s) {
         if (s == null || s.isBlank()) return null;
@@ -424,36 +521,37 @@ static void cu10() {
         try { return PosicionIVA.valueOf(s.trim().replace(" ", "")); }
         catch (Exception e) { return PosicionIVA.ConsumidorFinal; }
     }
-private static String leerConDefault(String label, String actual) {
-    System.out.print(label + " (" + noNull(actual) + "): ");
-    String in = scanner.nextLine();
-    return in.isBlank() ? actual : in.trim();
-}
 
-private static String noNull(String s) {
-    return (s == null) ? "" : s;
-}
+    private static String leerConDefault(String label, String actual) {
+        System.out.print(label + " (" + noNull(actual) + "): ");
+        String in = scanner.nextLine();
+        return in.isBlank() ? actual : in.trim();
+    }
 
-private static String mostrarTipo(TipoDocumento t) {
-    return t == null ? "" : t.name();
-}
+    private static String noNull(String s) {
+        return (s == null) ? "" : s;
+    }
 
-private static boolean igualesStr(String a, String b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    return a.equalsIgnoreCase(b);
-}
+    private static String mostrarTipo(TipoDocumento t) {
+        return t == null ? "" : t.name();
+    }
 
-private static boolean igualesTipo(TipoDocumento a, TipoDocumento b) {
-    if (a == null && b == null) return true;
-    if (a == null || b == null) return false;
-    return a == b;
-}
+    private static boolean igualesStr(String a, String b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return a.equalsIgnoreCase(b);
+    }
+
+    private static boolean igualesTipo(TipoDocumento a, TipoDocumento b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return a == b;
+    }
 
     private static LocalDate parseFecha(String s) {
         if (s == null || s.isBlank()) return null;
         String v = s.trim();
-        try { return LocalDate.parse(v); } // YYYY-MM-DD
+        try { return LocalDate.parse(v); } // yyyy-mm-dd
         catch (Exception e) {
             try {
                 DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM/yyyy");
