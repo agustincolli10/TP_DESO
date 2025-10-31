@@ -440,7 +440,7 @@ public class Main {
             
             
             for(int j=0; j<5; j++){
-                hAux = listaH.get(j);
+                hAux = listaHuespedComp.get(j);
                 if(h.getNumeroDocumento().equals(hAux.getNumeroDocumento())){
                     encontrado=true;
                 }
