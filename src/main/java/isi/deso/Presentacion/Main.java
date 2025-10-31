@@ -426,7 +426,6 @@ public class Main {
         EstadiaDAOImp eDAO = new EstadiaDAOImp();
         List<Estadia> listaE = new ArrayList();
         List<Huesped> listaH = new ArrayList();
-        HuespedDAOImp hDAO2 = new HuespedDAOImp();
         List<Huesped> listaHuespedComp = new ArrayList();
         Boolean encontrado = false;
         Huesped hAux = new Huesped();
@@ -436,11 +435,11 @@ public class Main {
         
         while(!encontrado && i < listaE.size()){ //recorre mientras el huesped no tenga estadia
             estadiaAux = listaE.get(i);
-            listaHuespedComp = hDAO2.obtenerTodos();
+            listaH = estadiaAux.getHuespedes();
             
             
             for(int j=0; j<5; j++){
-                hAux = listaHuespedComp.get(j);
+                hAux = listaH.get(j);
                 if(h.getNumeroDocumento().equals(hAux.getNumeroDocumento())){
                     encontrado=true;
                 }
