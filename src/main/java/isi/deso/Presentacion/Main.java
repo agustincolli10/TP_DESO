@@ -2,6 +2,7 @@ package isi.deso.Presentacion;
 
 import isi.deso.DAO.DireccionDAO;
 import isi.deso.DAO.DireccionDAOImp;
+import isi.deso.DAO.EstadiaDAOImp;
 import java.util.List;
 import java.util.Scanner;
 import java.time.LocalDate;
@@ -21,12 +22,15 @@ import isi.deso.Servicio.HuespedService;
 import isi.deso.Servicio.AuthService;
 import isi.deso.Excepcion.AutenticacionException;
 import isi.deso.Gestor.GestorHuesped;
+import isi.deso.Modelo.Estadia;
 
 import isi.deso.Strategy.Validacion;
 import isi.deso.Strategy.ValidacionCampos;
 import isi.deso.Strategy.ValidacionDocumentoUnico;
+import java.util.ArrayList;
 
 public class Main {
+    
 
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -121,7 +125,7 @@ public class Main {
             System.out.printf("[%d] %s%n", i + 1, lista.get(i));
         }
 
-        System.out.print("Seleccione Numero (Enter vacio = alta): ");
+        System.out.print("Seleccione nro. de huesped (Enter vacio = dar de alta): ");
         String sel = scanner.nextLine();
         if (sel.isBlank()) {
             cu09(); // alta si el usuario no selecciona ninguno
@@ -280,7 +284,7 @@ static void cu10() {
         System.out.printf("[%d] %s%n", i + 1, lista.get(i));
     }
 
-    System.out.print("Seleccione Nº de huesped a modificar: ");
+    System.out.print("Seleccione nro de huesped a modificar: ");
     String sel = scanner.nextLine();
     int idx;
     try {
@@ -377,14 +381,28 @@ static void cu10() {
             return;
         }
     }
-
-    //  persistir en el txt
-    try {
-        huespedDAO.modificarHuesped(tipoOriginal, nroOriginal, actualizado);
-        System.out.println("✅ Huesped modificado correctamente.");
-    } catch (Exception e) {
-        System.out.println("❌ Error al modificar el huesped: " + e.getMessage());
+    
+    System.out.println("Seleccione una opcion:");
+    System.out.println("1) Siguiente");
+    System.out.println("2) Cancelar modificacion");
+    System.out.println("3) Borrar huesped");
+    System.out.print("> ");
+    String valorSel = scanner.nextLine();
+    switch (valorSel) {
+        case "1" -> {
+            try {
+               huespedDAO.modificarHuesped(tipoOriginal, nroOriginal, actualizado);
+               System.out.println("Huesped modificado correctamente.");
+            } catch (Exception e) {
+            System.out.println("Error al modificar el huesped: " + e.getMessage());
+            }
+        }
+        case "2" -> {return;}
+        case "3" -> cu11();
+        default -> System.out.println("Opcion invalida");
     }
+
+    
 }
 
 
@@ -392,7 +410,7 @@ static void cu10() {
     
     static void cu11(){
         System.out.println("\nCU11 - Baja de huesped");
-                       
+        
     }
 
     private static TipoDocumento parseTipo(String s) {

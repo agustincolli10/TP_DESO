@@ -3,9 +3,15 @@ package isi.deso.DAO;
 
 import isi.deso.Modelo.Estadia;
 import isi.deso.Modelo.Huesped;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -38,7 +44,7 @@ public class EstadiaDAOImp implements EstadiaDAO {
           
             List<Huesped> huespedes = e.getHuespedes(); // Obtenemos la lista desde el objeto Estadia
 
-            for (int i = 0; i < MAX_HUESPEDES; i++) {
+            for (int i = 0; i < 5; i++) {
                 if (huespedes != null && i < huespedes.size()) {
                     // MAXI CAMBIO 2 DESDE ACÁ
                     Huesped h = huespedes.get(i);
@@ -51,7 +57,7 @@ public class EstadiaDAOImp implements EstadiaDAO {
                     // MAXI CAMBIO 2 HASTA ACÁ
                 }
         
-                if (i < MAX_HUESPEDES - 1) {
+                if (i < 5 - 1) {
                     sb.append(SEPARADOR);
                 }
             }
@@ -81,7 +87,7 @@ public class EstadiaDAOImp implements EstadiaDAO {
 
                 if (idLinea.equals(idEstadia)) {
                     // escribo la línea nueva
-                    bw.write(lineaFromEstadia(eActualizado));
+                    //bw.write(lineaFromEstadia(eActualizado));
                 } else {
                     // dejo la que estaba
                     bw.write(linea);
@@ -103,13 +109,58 @@ public class EstadiaDAOImp implements EstadiaDAO {
     
     @Override
     public Estadia obtenerEstadia(String idEstadia){
-        
-        
+        return obtenerTodas().stream()
+                .filter(e -> (e.getIdEstadia() == null ? idEstadia == null : e.getIdEstadia().equals(idEstadia)))
+                .findFirst()
+                .orElse(null);
     }
     
     @Override
     public List<Estadia> obtenerTodas(){
-        
+        List<Estadia> listaE = new ArrayList<>();
+        List<Huesped> huespedConEstadia = new ArrayList();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_E))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(SEPARADOR, -1); // -1 para conservar vacíos
+                if (datos.length >= 10) {
+                    // Reconstrucción del objeto
+                    
+                    HuespedDAOImp hDAO1 = new HuespedDAOImp();
+                    List<Huesped> listaHDAO = hDAO1.obtenerTodos();
+                    for(int i=0; i<listaHDAO.size(); i++){
+                        Huesped actual = listaHDAO.get(i);
+                        if(actual.getNumeroDocumento().equals(datos[6]) ||
+                                actual.getNumeroDocumento().equals(datos[7]) ||
+                                actual.getNumeroDocumento().equals(datos[8]) ||
+                                actual.getNumeroDocumento().equals(datos[9]) ||
+                                actual.getNumeroDocumento().equals(datos[10])){
+                            
+                            huespedConEstadia.add(actual);
+                        }
+                    }
+                    
+                    
+                    Estadia est = new Estadia(
+                    datos[0], //idEstadia
+                    datos[1], //codigoReserva
+                    datos[2], //codigoFactura
+                    datos[3], //costo
+                    LocalDate.parse(datos[4]), //fechaInicio
+                    LocalDate.parse(datos[5]), //fechaFinal
+                    huespedConEstadia);                   
+
+                    listaE.add(est);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Si el archivo no existe, se crea vacío al guardar el primero
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return listaE;
     }
 }
 

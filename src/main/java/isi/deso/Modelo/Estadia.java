@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Estadia {
    public String idEstadia, codReserva, codFactura;
-   public int costo;
+   public String costo;
    public LocalDate fechaIn, fechaOut;
    public List<Huesped> huespedes;
    
@@ -17,7 +17,7 @@ public class Estadia {
    
    
    
-   public Estadia(String id, String codR, String codF, int costo, LocalDate fIn, LocalDate fOut, List<Huesped> h){
+   public Estadia(String id, String codR, String codF, String costo, LocalDate fIn, LocalDate fOut, List<Huesped> h){
        this.idEstadia = id;
        this.codReserva = codR;
        this.codFactura = codF;
@@ -45,10 +45,10 @@ public class Estadia {
    public void setCodFactura(String codF){
        codFactura = codF;
    }
-   public int getCosto(){
+   public String getCosto(){
        return costo;
    }
-   public void setCosto(int c){
+   public void setCosto(String c){
        costo = c;
    }
    public LocalDate getFechaIngreso(){
