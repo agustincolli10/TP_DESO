@@ -419,36 +419,49 @@ public class Main {
     }
 
     // cu11 - borrar huesped
-    static void cu11(Huesped h) {
-        System.out.println("\ncu11 - dar de baja huesped");
+  static void cu11(Huesped h) {
+    System.out.println("\ncu11 - dar de baja huesped");
 
-        Estadia estadiaAux = new Estadia();
-        EstadiaDAOImp eDAO = new EstadiaDAOImp();
-        List<Estadia> listaE = new ArrayList();
-        List<Huesped> listaH = new ArrayList();
-        List<Huesped> listaHuespedComp = new ArrayList();
-        Boolean encontrado = false;
-        Huesped hAux = new Huesped();
-        
-        listaE = eDAO.obtenerTodas(); //obtiene todas las estadias y las agrega a listaE
-        int i=0;
-        
-        while(!encontrado && i < listaE.size()){ //recorre mientras el huesped no tenga estadia
-            estadiaAux = listaE.get(i);
-            listaH = estadiaAux.getHuespedes();
-            
-            
-            for(int j=0; j<5; j++){
-                hAux = listaH.get(j);
-                if(h.getNumeroDocumento().equals(hAux.getNumeroDocumento())){
-                    encontrado=true;
-                }
+    // 1) traigo todas las estadias
+    EstadiaDAOImp eDAO = new EstadiaDAOImp(huespedDAO);
+    List<Estadia> listaE = eDAO.obtenerTodas();
+
+    boolean encontrado = false;
+
+    // 2) recorro todas las estadias
+    for (Estadia e : listaE) {
+        List<Huesped> listaH = e.getHuespedes();
+        if (listaH == null) continue;
+
+        // 3) recorro los huespedes de esa estadia
+        for (Huesped hEst : listaH) {
+            if (hEst == null) continue;
+            if (hEst.getTipoDocumento() == h.getTipoDocumento()
+                    && hEst.getNumeroDocumento().equalsIgnoreCase(h.getNumeroDocumento())) {
+                encontrado = true;
+                break;
             }
-                        
-            i++;
-            
-            return;
         }
+        if (encontrado) break;
+    }
+
+    if (encontrado) {
+        System.out.println("no se puede borrar: el huesped tiene estadias asociadas.");
+        return;
+    }
+
+    // 4) si no tiene estadias, pido confirmacion y borro
+    System.out.print("confirma borrar al huesped? (si/no): ");
+    String r = scanner.nextLine().trim().toUpperCase();
+    if (!r.equals("SI")) {
+        System.out.println("baja cancelada.");
+        return;
+    }
+
+    // 5) borro en el dao
+    huespedDAO.eliminarHuesped(h);
+    System.out.println("huesped borrado.");
+}
                 
         if(!encontrado){
             HuespedDAOImp hDAO = new HuespedDAOImp();
