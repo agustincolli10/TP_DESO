@@ -77,7 +77,6 @@ public class Main {
                 System.out.println("1) buscar huesped");
                 System.out.println("2) dar de alta huesped");
                 System.out.println("3) modificar huesped");
-                System.out.println("4) registrar estadia");
                 System.out.println("0) salir");
                 System.out.print("> ");
                 String op = scanner.nextLine();
@@ -85,7 +84,6 @@ public class Main {
                     case "1" -> cu02();
                     case "2" -> cu09();
                     case "3" -> cu10();
-                    case "4" -> cu11();    // registra estadia
                     case "0" -> { System.out.println("fin."); return; }
                     default -> System.out.println("opcion invalida");
                 }
@@ -321,7 +319,7 @@ public class Main {
         System.out.println("deje vacio para mantener el valor actual.");
 
         // datos nuevos
-        String nuevoNombre   = leerConDefault("nombres", orig.getNombres());
+       String nuevoNombre   = leerConDefault("nombres", orig.getNombres());
         String nuevoApellido = leerConDefault("apellido", orig.getApellido());
 
         System.out.print("tipo doc (" + mostrarTipo(orig.getTipoDocumento()) + "): ");
@@ -364,7 +362,7 @@ public class Main {
         String nac = leerConDefault("nacionalidad", noNull(orig.getNacionalidad()));
 
         // armo el huesped actualizado
-        Huesped actualizado = new Huesped(
+       Huesped actualizado = new Huesped(
                 nuevoNombre,
                 nuevoApellido,
                 nuevoTipo,
@@ -394,8 +392,8 @@ public class Main {
                 System.out.println(v2.getMensajeError());
                 return;
             }
-        }
-        
+        } 
+
         System.out.println("seleccione una opcion:");
         System.out.println("1) guardar modificacion");
         System.out.println("2) cancelar modificacion");
@@ -414,98 +412,51 @@ public class Main {
             case "2" -> { return; }
             case "3" -> {
                 // llamo al cu11 para cargar estadia
-                cu11();
+                cu11(actualizado);
             }
             default -> System.out.println("opcion invalida");
         }
     }
 
-    // cu11 - registrar estadia
-    static void cu11() {
-        System.out.println("\ncu11 - registrar estadia");
+    // cu11 - borrar huesped
+    static void cu11(Huesped h) {
+        System.out.println("\ncu11 - dar de baja huesped");
 
-        // datos basicos
-        System.out.print("id de estadia: ");
-        String id = scanner.nextLine().trim();
-        if (id.isEmpty()) {
-            System.out.println("el id de la estadia es obligatorio.");
-            return;
-        }
-
-        // si ya existe, aviso
-        Estadia existente = estadiaDAO.obtenerEstadia(id);
-        if (existente != null) {
-            System.out.println("ya existe una estadia con ese id. use modificarEstadia si corresponde.");
-            return;
-        }
-
-        System.out.print("codigo de reserva (enter si no tiene): ");
-        String codRes = scanner.nextLine().trim();
-
-        System.out.print("codigo de factura (enter si no tiene): ");
-        String codFac = scanner.nextLine().trim();
-
-        System.out.print("costo (puede ser numero o texto): ");
-        String costo = scanner.nextLine().trim();
-
-        System.out.print("fecha ingreso (yyyy-mm-dd o dd/mm/yyyy): ");
-        LocalDate fIn = parseFecha(scanner.nextLine());
-
-        System.out.print("fecha salida (yyyy-mm-dd o dd/mm/yyyy): ");
-        LocalDate fOut = parseFecha(scanner.nextLine());
-
-        // lista de huespedes de la estadia
-        List<Huesped> huespedes = new ArrayList<>();
-
-        System.out.println("\n--- agregar huespedes a la estadia (max 5) ---");
-        boolean seguir = true;
-        while (seguir && huespedes.size() < 5) {
-
-            System.out.print("tipo doc huesped (dni/le/lc/pasaporte/otro): ");
-            TipoDocumento t = parseTipo(scanner.nextLine());
-
-            System.out.print("numero doc huesped: ");
-            String ndoc = scanner.nextLine().trim();
-
-            if (t == null || ndoc.isEmpty()) {
-                System.out.println("tipo o numero vacio, no se agrega.");
-            } else {
-                Huesped h = huespedDAO.obtenerHuesped(t, ndoc);
-                if (h == null) {
-                    System.out.println("no existe un huesped con ese documento. debe darlo de alta primero (cu09).");
-                } else {
-                    huespedes.add(h);
-                    System.out.println("huesped agregado: " + h);
+        Estadia estadiaAux = new Estadia();
+        EstadiaDAOImp eDAO = new EstadiaDAOImp();
+        List<Estadia> listaE = new ArrayList();
+        List<Huesped> listaH = new ArrayList();
+        HuespedDAOImp hDAO2 = new HuespedDAOImp();
+        List<Huesped> listaHuespedComp = new ArrayList();
+        Boolean encontrado = false;
+        Huesped hAux = new Huesped();
+        
+        listaE = eDAO.obtenerTodas(); //obtiene todas las estadias y las agrega a listaE
+        int i=0;
+        
+        while(!encontrado && i < listaE.size()){ //recorre mientras el huesped no tenga estadia
+            estadiaAux = listaE.get(i);
+            listaHuespedComp = hDAO2.obtenerTodos();
+            
+            
+            for(int j=0; j<5; j++){
+                hAux = listaH.get(j);
+                if(h.getNumeroDocumento().equals(hAux.getNumeroDocumento())){
+                    encontrado=true;
                 }
             }
-
-            if (huespedes.size() < 5) {
-                System.out.print("¿agregar otro huesped? (si/no): ");
-                String r = scanner.nextLine().trim().toUpperCase();
-                seguir = r.equals("SI");
-            } else {
-                System.out.println("se alcanzo el maximo de 5 huespedes.");
-            }
+                        
+            i++;
+            
+            return;
         }
-
-        // armo objeto
-        Estadia nueva = new Estadia(
-                id,
-                codRes,
-                codFac,
-                costo,
-                fIn,
-                fOut,
-                huespedes
-        );
-
-        // guardo en txt
-        try {
-            estadiaDAO.crearEstadia(nueva);
-            System.out.println("✅ estadia registrada correctamente.");
-        } catch (Exception e) {
-            System.out.println("❌ error al registrar la estadia: " + e.getMessage());
+                
+        if(!encontrado){
+            HuespedDAOImp hDAO = new HuespedDAOImp();
+            hDAO.eliminarHuesped(h);
+            System.out.println("Huesped " + h.getNumeroDocumento() + " eliminado.");
         }
+        
     }
 
     // helpers

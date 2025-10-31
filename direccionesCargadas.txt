@@ -5,3 +5,4 @@ Rivadavia;2580;NOP;0;C1033;Buenos Aires;CABA;Argentina
 9 de Julio;550;NOP;0;5000;Cordoba;Cordoba;Argentina
 Belgrano;845;A;10;2000;Rosario;Santa Fe;Argentina
 Av. de Mayo;1370;NOP;0;C1085;Buenos Aires;CABA;ArgentinaPje Publico;205;NoPosee;0;3000;Santa Fe;Santa FE;Argentina;
+Falucho;2341;NoPosee;1;3000;Santa Fe;Santa Fe;Argentina;
