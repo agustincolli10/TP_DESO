@@ -117,51 +117,82 @@ public class EstadiaDAOImp implements EstadiaDAO {
     
     @Override
     public List<Estadia> obtenerTodas(){
-        List<Estadia> listaE = new ArrayList<>();
-        List<Huesped> huespedConEstadia = new ArrayList();
+    List<Estadia> listaE = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_E))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                String[] datos = linea.split(SEPARADOR, -1); // -1 para conservar vacíos
-                if (datos.length >= 10) {
-                    // Reconstrucción del objeto
-                    
-                    HuespedDAOImp hDAO1 = new HuespedDAOImp();
-                    List<Huesped> listaHDAO = hDAO1.obtenerTodos();
-                    for(int i=0; i<listaHDAO.size(); i++){
-                        Huesped actual = listaHDAO.get(i);
-                        if(actual.getNumeroDocumento().equals(datos[6]) ||
-                                actual.getNumeroDocumento().equals(datos[7]) ||
-                                actual.getNumeroDocumento().equals(datos[8]) ||
-                                actual.getNumeroDocumento().equals(datos[9]) ||
-                                actual.getNumeroDocumento().equals(datos[10])){
-                            
-                            huespedConEstadia.add(actual);
-                        }
+    try (BufferedReader br = new BufferedReader(new FileReader(ARCHIVO_E))) {
+        String linea;
+        while ((linea = br.readLine()) != null) {
+            if (linea.isBlank()) continue;
+
+            String[] datos = linea.split(SEPARADOR, -1);
+            // esperamos: 6 campos fijos + 5 huéspedes = 11
+            if (datos.length < 11) {
+                continue;
+            }
+
+            String idEst = datos[0];
+            String codRes = datos[1];
+            String codFac = datos[2];
+            String costo  = datos[3];
+
+            LocalDate fIn  = datos[4].isBlank() ? null : LocalDate.parse(datos[4]);
+            LocalDate fOut = datos[5].isBlank() ? null : LocalDate.parse(datos[5]);
+
+            // lista de huespedes SOLO para esta estadia
+            List<Huesped> huespedesDeEsta = new ArrayList<>();
+
+            // campos 6..10 = 5 posibles huespedes
+            for (int i = 6; i <= 10; i++) {
+                String docStr = datos[i];
+                if (docStr == null || docStr.isBlank()) continue;
+
+                // viene "TIPO|NUM"
+                String[] partes = docStr.split("\\|", -1);
+                if (partes.length != 2) continue;
+
+                String tipoStr = partes[0];
+                String numStr  = partes[1];
+
+                if (numStr.isBlank()) continue;
+
+                TipoDocumento tipo = null;
+                try {
+                    if (!tipoStr.isBlank()) {
+                        tipo = TipoDocumento.valueOf(tipoStr);
                     }
-                    
-                    
-                    Estadia est = new Estadia(
-                    datos[0], //idEstadia
-                    datos[1], //codigoReserva
-                    datos[2], //codigoFactura
-                    datos[3], //costo
-                    LocalDate.parse(datos[4]), //fechaInicio
-                    LocalDate.parse(datos[5]), //fechaFinal
-                    huespedConEstadia);                   
+                } catch (Exception ex) {
+                    tipo = null;
+                }
 
-                    listaE.add(est);
+                if (tipo != null) {
+                    Huesped h = this.huespedDAO.obtenerHuesped(tipo, numStr);
+                    if (h != null) {
+                        huespedesDeEsta.add(h);
+                    }
                 }
             }
-        } catch (FileNotFoundException e) {
-            // Si el archivo no existe, se crea vacío al guardar el primero
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        return listaE;
+            Estadia est = new Estadia(
+                idEst,
+                codRes,
+                codFac,
+                costo,
+                fIn,
+                fOut,
+                huespedesDeEsta
+            );
+
+            listaE.add(est);
+        }
+    } catch (FileNotFoundException e) {
+        // si no hay archivo, devolvemos lista vacía
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+
+    return listaE;
 }
+}
+
 
 
