@@ -5,7 +5,23 @@
 package isi.deso.Strategy;
 import isi.deso.Modelo.Huesped;
 import isi.deso.Modelo.DireccionDTO;
+/**
+ * Estrategia de validacion que verifica que los campos obligatorios
+ * de un huesped esten completados.
+ * <p>
+ * Se utiliza para asegurar que no existan valores nulos o vacios antes
+ * de guardar o modificar un huesped.
+ * </p>
+ *
+ * @see Validacion
+ */
 public class ValidacionCampos implements Validacion{
+    /**
+     * Valida todos los campos del huesped recibido.
+     *
+     * @param h {@link isi.deso.Modelo.Huesped} a validar
+     * @return {@code true} si todos los campos requeridos son validos, {@code false} en caso contrario
+     */
     @Override
     public boolean validar(Huesped h){
         if (h.getNombres() == null || h.getNombres().isEmpty()) { System.out.println("El/Los nombres no han sido completado/s.");return false; }

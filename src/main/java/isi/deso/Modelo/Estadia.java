@@ -4,7 +4,15 @@ package isi.deso.Modelo;
 import java.time.LocalDate;
 import java.util.List;
 
-
+/**
+ * Clase que representa una estadia registrada.
+ * <p>
+ * Contiene todos los atributos necesarios para
+ * almacenar una reserva en el sistema.
+ * </p>
+ *
+ * @see isi.deso.Modelo.Huesped
+ */
 public class Estadia {
    public String idEstadia, codReserva, codFactura;
    public String costo;
@@ -14,9 +22,17 @@ public class Estadia {
     public Estadia() {
     }
    
-   
-   
-   
+   /**
+     * Crea una instancia de Estadia con todos sus atributos.
+     * 
+     * @param id id de la estadia
+     * @param codR codigo de la reserva
+     * @param codF codigo de la factura
+     * @param costo precio final de la estadia
+     * @param fIn {@code java.time.LocalDate} fecha de ingreso
+     * @param fOut {@code java.time.LocalDate} fecha de salida
+     * @param h lista de huespedes
+     */
    public Estadia(String id, String codR, String codF, String costo, LocalDate fIn, LocalDate fOut, List<Huesped> h){
        this.idEstadia = id;
        this.codReserva = codR;

@@ -7,9 +7,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implementacion de UsuarioDAO que utiliza archivos de texto como
+ * medio de persistencia.
+ * <p>
+ * Se encarga de guardar y recuperar usuarios 
+ * desde el archivo usuariosCargados.txt
+ * </p>
+ * 
+ * @see isi.deso.DAO.UsuarioDAO
+ * @see isi.deso.Modelo.Usuario
+ */
 public class UsuarioDAOImpFile implements UsuarioDAO {
     private static final String ARCHIVO = "usuariosCargados.txt";
 
+    /**
+     * Devuelve una lista con los usuarios leidos en el archivo.
+     *
+     * @return coleccion con los usuarios leidos
+     */
     @Override
     public List<Usuario> listaCompUser() {
         List<Usuario> out = new ArrayList<>();
@@ -39,6 +55,11 @@ public class UsuarioDAOImpFile implements UsuarioDAO {
         return out;
     }
 
+    /**
+     * Guarda un nuevo usuario en el archivo.
+     *
+     * @param u usuario a registrar
+     */
     @Override
     public void guardarUsuario(Usuario u) {
         try (BufferedWriter bw = new BufferedWriter(

@@ -30,6 +30,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+/**
+ * Clase principal del sistema.
+ * <p>
+ * Inicializa la aplicacion, ejecuta el proceso de inicio de sesion
+ * y permite el acceso a los distintos casos de uso definidos para el sistema.
+ * </p>
+ */
 public class Main {
     
     // lee por consola
@@ -44,6 +51,9 @@ public class Main {
     // servicio que busca con filtros
     private static final HuespedService huespedService = new HuespedService(huespedDAO);
 
+    /**
+     * Punto de entrada principal del sistema.
+     */
     public static void main(String[] args) {
         try {
             // cu01 - login
@@ -98,6 +108,10 @@ public class Main {
     }
 
     // cu02 - buscar huesped
+    /**
+     * Implementa el segundo caso de uso, buscar un huesped.
+     * Recibe datos por consola y ejecuta el servicio de busqueda.
+     */
     static void cu02() {
         System.out.println("cu02 - buscar huesped");
 
@@ -150,6 +164,10 @@ public class Main {
     }
 
     // cu09 - alta de huésped
+    /**
+     * Implementa el noveno caso de uso, dar de alta un huesped.
+     * Recibe datos por consola, los valida y registra en el sistema
+     */
     static void cu09() {
         boolean flag = true;
         // variables para leer
@@ -271,6 +289,10 @@ public class Main {
     }
     
     // cu10 - modificar huesped
+    /**
+     * Implementa el decimo caso de uso, modificar un huesped.
+     * Recibe datos por consola y modifica el huesped registrado.
+     */
     static void cu10() {
         System.out.println("\ncu10 - modificar huesped");
 
@@ -421,6 +443,10 @@ public class Main {
     }
 
     // cu11 - registrar estadia
+    /**
+     * Implementa el onceavo caso de uso, registrar una estadia.
+     * Recibe datos por consola y crea una nueva estadia
+     */
     static void cu11() {
         System.out.println("\ncu11 - registrar estadia");
 
@@ -509,45 +535,103 @@ public class Main {
     }
 
     // helpers
-
+    /**
+     * Transforma la cadena recibida en el {@link isi.deso.Modelo.TipoDocumento} correspondiente.
+     * 
+     * @param s {@code String} que representa un tipo de documento a convertir
+     * @return {@code TipoDocumento} equivalente
+     * 
+     * @throws Exception si la conversion falla
+     */
     private static TipoDocumento parseTipo(String s) {
         if (s == null || s.isBlank()) return null;
         try { return TipoDocumento.valueOf(s.trim().toUpperCase()); }
         catch (Exception e) { return null; }
     }
 
+    /**
+     * Transforma la cadena recibida en la {@link isi.deso.Modelo.PosicionIVA} correspondiente.
+     * 
+     * @param s {@code String} que representa una posicion IVA a convertir
+     * @return {@code PosicionIVA} equivalente
+     * 
+     * @throws Exception si la conversion falla
+     */
     private static PosicionIVA parsePos(String s) {
         if (s == null || s.isBlank()) return PosicionIVA.ConsumidorFinal;
         try { return PosicionIVA.valueOf(s.trim().replace(" ", "")); }
         catch (Exception e) { return PosicionIVA.ConsumidorFinal; }
     }
 
+    /**
+     * Metodo utilizado para leer un dato a modificar y recibirlo sin espacios innecesarios.
+     * 
+     * @param label {@code String} que representa el dato a modificar
+     * @param actual {@code String} que representa el estado actual del dato ya registrado
+     * @return {@code actual} si no se recibe un dato por consola,
+     * caso contrario {@code in} (cadena recibida por consola sin espacios innecesarios)
+     */
     private static String leerConDefault(String label, String actual) {
         System.out.print(label + " (" + noNull(actual) + "): ");
         String in = scanner.nextLine();
         return in.isBlank() ? actual : in.trim();
     }
 
+    /**
+     * Retorna una cadena vacia cuando el parametro es {@code null}.
+     *
+     * @param s cadena a evaluar (puede ser {@code null})
+     * @return {@code s} si no es {@code null}, en caso contrario {@code ""}
+     */
     private static String noNull(String s) {
         return (s == null) ? "" : s;
     }
 
+    /**
+     * Convierte un {@link isi.deso.Modelo.TipoDocumento} a {@code String}.
+     *
+     * @param t tipo de documento
+     * @return el nombre del enum mediante {@code name()}, o {@code ""} si {@code t} es {@code null}
+     */
     private static String mostrarTipo(TipoDocumento t) {
         return t == null ? "" : t.name();
     }
 
+    /**
+     * Compara dos cadenas, sin distinguir mayusculas/minusculas.
+     *
+     * @param a primera cadena
+     * @param b segunda cadena
+     * @return {@code true} si ambas son {@code null} o si son iguales sin distinguir mayusculas/minusculas,
+     *         {@code false} si solo una es {@code null} o si son distintas
+     */
     private static boolean igualesStr(String a, String b) {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
         return a.equalsIgnoreCase(b);
     }
 
+    /**
+     * Compara dos {@link isi.deso.Modelo.TipoDocumento}.
+     *
+     * @param a primer tipo
+     * @param b segundo tipo
+     * @return {@code true} si ambos son {@code null} o si son el mismo valor del enum, {@code false} en caso contrario
+     */
     private static boolean igualesTipo(TipoDocumento a, TipoDocumento b) {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
         return a == b;
     }
 
+    /**
+     * Intenta convertir una cadena a {@link java.time.LocalDate}.
+     *
+     * @param s cadena con la fecha a parsear
+     * @return la fecha convertida o {@code null} si la conversion no fue posible
+     * 
+     * @throws Exception si la conversion falla
+     */
     private static LocalDate parseFecha(String s) {
         if (s == null || s.isBlank()) return null;
         String v = s.trim();

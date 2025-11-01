@@ -4,4 +4,9 @@
  */
 package isi.deso.Modelo;
 
+/**
+ * Enum que representa los tipos de posicion frente al IVA validos.
+ *
+ * @see isi.deso.Modelo.Persona
+ */
 public enum PosicionIVA { ResponsableInscripto, Monotributista, Exento, ConsumidorFinal}
