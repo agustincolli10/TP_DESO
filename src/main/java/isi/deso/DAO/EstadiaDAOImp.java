@@ -3,6 +3,7 @@ package isi.deso.DAO;
 
 import isi.deso.Modelo.Estadia;
 import isi.deso.Modelo.Huesped;
+import isi.deso.Modelo.TipoDocumento;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;

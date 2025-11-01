@@ -502,8 +502,6 @@ public class Main {
      * 
      * @param s {@code String} que representa un tipo de documento a convertir
      * @return {@code TipoDocumento} equivalente
-     * 
-     * @throws Exception si la conversion falla
      */
     private static TipoDocumento parseTipo(String s) {
         if (s == null || s.isBlank()) return null;
@@ -516,8 +514,6 @@ public class Main {
      * 
      * @param s {@code String} que representa una posicion IVA a convertir
      * @return {@code PosicionIVA} equivalente
-     * 
-     * @throws Exception si la conversion falla
      */
     private static PosicionIVA parsePos(String s) {
         if (s == null || s.isBlank()) return PosicionIVA.ConsumidorFinal;
@@ -591,8 +587,6 @@ public class Main {
      *
      * @param s cadena con la fecha a parsear
      * @return la fecha convertida o {@code null} si la conversion no fue posible
-     * 
-     * @throws Exception si la conversion falla
      */
     private static LocalDate parseFecha(String s) {
         if (s == null || s.isBlank()) return null;

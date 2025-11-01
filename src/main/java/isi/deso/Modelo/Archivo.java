@@ -14,8 +14,6 @@ public class Archivo {
      * 
      * @param direccion es la ruta del archivo a leer
      * @return todo el contenido del archivo en una cadena de caracteres
-     * 
-     * @throws Exception si el archivo no fue encontrado
      */
     public String leerTxt(String direccion){ //direccion: archivo
         

@@ -25,6 +25,7 @@ public class UsuarioDAOImpFile implements UsuarioDAO {
      * Devuelve una lista con los usuarios leidos en el archivo.
      *
      * @return coleccion con los usuarios leidos
+     * @throws RuntimeException si hubo un error al leer el archivo
      */
     @Override
     public List<Usuario> listaCompUser() {
@@ -59,6 +60,7 @@ public class UsuarioDAOImpFile implements UsuarioDAO {
      * Guarda un nuevo usuario en el archivo.
      *
      * @param u usuario a registrar
+     * @throws RuntimeException si hubo un error al escribir en el archivo
      */
     @Override
     public void guardarUsuario(Usuario u) {
